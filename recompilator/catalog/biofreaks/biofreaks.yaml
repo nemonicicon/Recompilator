@@ -1,0 +1,51 @@
+name: Bio FREAKS (USA)
+sha1: e20e9124480b559aa7148412c8993804501e180d
+options:
+  basename: biofreaks
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/biofreaks.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x10A8, asm, main_800004A8]
+      - [0x1BAEC, asm, main_8001AEEC]
+      - [0x7C144, asm, main_8007B544]
+      - [0x7C510, asm, main_8007B910]
+      - [0x8A400, asm, main_80089800]
+      - [0x91174, bin, main_80090574]
+      - [0x9F480, asm, main_8009E880]
+      - [0x9FC80, bin, main_8009F080]
+      - [0xA00D0, asm, main_8009F4D0]
+      - [0xA0750, asm, main_8009FB50]
+      - [0xA07CC, bin, main_8009FBCC]
+      - [0xB8878, asm, main_800B7C78]
+      - [0xF7208, asm, main_800F6608]
+      - [0xFA0DC, bin, main_800F94DC]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

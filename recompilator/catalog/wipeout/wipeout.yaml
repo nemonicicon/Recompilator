@@ -1,0 +1,69 @@
+name: Wipeout 64 (USA)
+sha1: 54e4795aba4fc326f79d0703ffdb51a212dd4b5c
+options:
+  basename: wipeout
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/wipeout.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x4490, bin, main_80003890]
+      - [0x5B64, bin, main_80004F64]
+      - [0x9850, asm, main_80008C50]
+      - [0x888C0, bin, main_80087CC0]
+      - [0x89C10, asm, main_80089010]
+      - [0x8A85C, bin, main_80089C5C]
+      - [0x8D24C, asm, main_8008C64C]
+      - [0x8D5E4, bin, main_8008C9E4]
+      - [0x8E09C, asm, main_8008D49C]
+      - [0x8E780, bin, main_8008DB80]
+      - [0x8F24C, asm, main_8008E64C]
+      - [0x91450, bin, main_80090850]
+      - [0x93780, asm, main_80092B80]
+      - [0x93EB8, bin, main_800932B8]
+      - [0x940E8, asm, main_800934E8]
+      - [0x9445C, bin, main_8009385C]
+      - [0x956BC, asm, main_80094ABC]
+      - [0x97D74, bin, main_80097174]
+      - [0x994BC, bin, main_800988BC]
+      - [0xBA6BC, asm, main_800B9ABC]
+      - [0xBA6E0, bin, main_800B9AE0]
+      - [0xC3C04, asm, main_800C3004]
+      - [0xC3C18, bin, main_800C3018]
+      - [0xD4630, asm, main_800D3A30]
+      - [0xD466C, bin, main_800D3A6C]
+      - [0xE78EC, asm, main_800E6CEC]
+      - [0xE7908, bin, main_800E6D08]
+      - [0xEA07C, asm, main_800E947C]
+      - [0xEA098, bin, main_800E9498]
+      - [0xFD24C, asm, main_800FC64C]
+      - [0xFD25C, bin, main_800FC65C]
+      - [0x10007C, bin, main_800FF47C]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

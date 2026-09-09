@@ -1,0 +1,25 @@
+# data-as-code funcs flagged by classify_funcs.py (stub, don't recompile)
+func_8009F874
+func_8009FC4C
+func_8009FD54
+func_800A1E68
+func_800A8EB8
+func_800AA378
+func_800AB638
+func_800AEFA0
+func_800AEFC4
+func_800B7880
+func_800B8080
+func_800BB038
+func_800BB160
+func_800BB574
+func_800BB6D4
+func_800BBB04
+func_800BD75C
+func_800BF1E4
+static_3_800A7B04
+static_3_800A9980
+static_3_800A9B90
+static_3_800A9BAC
+static_3_800A9BD8
+static_3_800B4CA8

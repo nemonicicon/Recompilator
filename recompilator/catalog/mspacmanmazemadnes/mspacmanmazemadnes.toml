@@ -1,0 +1,30 @@
+[input]
+entrypoint                = 0x80200400
+elf_path                  = "../mspacmanmazemadnes/build/mspacmanmazemadnes.elf"
+rom_file_path             = "../mspacmanmazemadnes/baserom.z64"
+output_func_path          = "../mspacmanmazemadnespc/RecompiledFuncs"
+relocatable_sections_path = "mspacmanmazemadnes_overlays.txt"
+
+uses_mips3_float_mode = true
+
+function_sizes = [
+  { name = "func_80200400", size = 112 },
+  { name = "func_80200470", size = 28 },
+  { name = "func_8020048C", size = 360 },
+  { name = "func_802005F4", size = 12 },
+  { name = "func_80200600", size = 128 },
+  { name = "osWritebackDCacheAll", size = 48 },
+  { name = "func_80219088", size = 16 },
+  { name = "func_8022D570", size = 16 },
+  { name = "func_802345FC", size = 16 },
+  { name = "func_8024E2E4", size = 48 },
+]
+
+exact_size_funcs = [
+
+]
+
+[patches]
+stubs = [
+
+]

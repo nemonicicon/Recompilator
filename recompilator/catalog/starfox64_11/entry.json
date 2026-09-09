@@ -1,0 +1,56 @@
+{
+  "game": "starfox64_11",
+  "rom": {
+    "sha1": "09f0d105f476b00efa5303a3ebc42e60a7753b7a",
+    "xxh3_64": "0x163FD3FC3813F54E",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Star Fox 64 (NFXE rev 1.1) (USA)"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_data_ranges.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "starfox64_11.toml",
+    "starfox64_11.yaml",
+    "starfox64_11_overlays.txt",
+    "starfox64_11_pinned.ld",
+    "starfox64_11_stubs.txt",
+    "symbol_addrs.txt",
+    "ucode/aspmain_sf64.toml",
+    "ucode/f3dexnon122.toml",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

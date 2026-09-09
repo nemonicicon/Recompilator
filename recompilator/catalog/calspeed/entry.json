@@ -1,0 +1,55 @@
+{
+  "game": "calspeed",
+  "rom": {
+    "sha1": "bd4c070a71ef58499587cb811fb7490b88dd7c0b",
+    "xxh3_64": "0xB5282DFA12B8497D",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "California Speed",
+    "release": "1999-02-28",
+    "sweep": "CAP"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "calspeed.toml",
+    "calspeed.yaml",
+    "calspeed_overlays.txt",
+    "calspeed_pinned.ld",
+    "calspeed_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

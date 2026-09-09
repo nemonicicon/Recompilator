@@ -1,0 +1,47 @@
+﻿name: "turok3b2 (turok3b2)"
+sha1: df10c5d421aeab2af438648588600839cd82b5e0
+options:
+  basename: turok3b2
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/turok3b2.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: true
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: bin
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  # ACCLAIM WINDOW MODEL (acclaim_setup.py, decoded from this cart's own boot stub):
+  # stub at KSEG0 0x80000400 maps virtual 0x200000 -> phys 0 and jalr's to
+  # 0x0020C940; the body is LINKED AT THE WINDOW (virtual = 0x200000 + phys).
+  - name: boot
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, boot_80000400]
+  - name: main
+    type: code
+    start: 0x1100
+    vram: 0x00200500
+    subsegments:
+      - [0x1100, asm, main_00200500]
+      - [0xF7000, bin, main_002F6400]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x2000000]

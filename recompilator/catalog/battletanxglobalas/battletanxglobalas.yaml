@@ -1,0 +1,97 @@
+name: BattleTanx - Global Assault (USA)
+sha1: 805248fb0a0ee694cad8d7dc927b631d860dd8cf
+options:
+  basename: battletanxglobalas
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/battletanxglobalas.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80071000
+    subsegments:
+      - [0x1000, asm, main_80071000]
+      - [0x7C40, asm, main_80077C40]
+      - [0xE118, bin, main_8007E118]
+      - [0xE170, asm, main_8007E170]
+      - [0x310E0, bin, main_800A10E0]
+      - [0x31150, asm, main_800A1150]
+      - [0x4B53C, bin, main_800BB53C]
+      - [0x4C020, asm, main_800BC020]
+      - [0x6EEDC, bin, main_800DEEDC]
+      - [0x6F0D0, asm, main_800DF0D0]
+      - [0x7C778, bin, main_800EC778]
+      - [0x7C790, asm, main_800EC790]
+      - [0x81900, bin, main_800F1900]
+      - [0x81B30, asm, main_800F1B30]
+      - [0x88660, bin, main_800F8660]
+      - [0x8AFBC, asm, main_800FAFBC]
+      - [0xA4470, bin, main_80114470]
+      - [0xA5548, asm, main_80115548]
+      - [0xA55B0, bin, main_801155B0]
+      - [0xA8918, asm, main_80118918]
+      - [0xA8928, bin, main_80118928]
+      - [0xA9628, asm, main_80119628]
+      - [0xA9718, bin, main_80119718]
+      - [0xAA20C, asm, main_8011A20C]
+      - [0xAA218, bin, main_8011A218]
+      - [0xAA254, asm, main_8011A254]
+      - [0xAA280, bin, main_8011A280]
+      - [0xAA344, asm, main_8011A344]
+      - [0xAA350, bin, main_8011A350]
+      - [0xAA3A8, asm, main_8011A3A8]
+      - [0xAA3BC, bin, main_8011A3BC]
+      - [0xAA3E0, asm, main_8011A3E0]
+      - [0xAA420, bin, main_8011A420]
+      - [0xAA47C, asm, main_8011A47C]
+      - [0xAA484, bin, main_8011A484]
+      - [0xAA4C0, asm, main_8011A4C0]
+      - [0xAA4F8, bin, main_8011A4F8]
+      - [0xAA540, asm, main_8011A540]
+      - [0xAA784, bin, main_8011A784]
+      - [0xAAB4C, asm, main_8011AB4C]
+      - [0xAAB7C, bin, main_8011AB7C]
+      - [0xAAD0C, asm, main_8011AD0C]
+      - [0xAAD3C, bin, main_8011AD3C]
+      - [0xAAECC, asm, main_8011AECC]
+      - [0xAAEFC, bin, main_8011AEFC]
+      - [0xAB08C, asm, main_8011B08C]
+      - [0xAB0BC, bin, main_8011B0BC]
+      - [0xADBD8, asm, main_8011DBD8]
+      - [0xADC38, bin, main_8011DC38]
+      - [0xADC48, asm, main_8011DC48]
+      - [0xADD28, bin, main_8011DD28]
+      - [0xAE710, asm, main_8011E710]
+      - [0xAE730, bin, main_8011E730]
+      - [0xAFA5C, asm, main_8011FA5C]
+      - [0xAFA8C, bin, main_8011FA8C]
+      - [0xB79B8, asm, main_801279B8]
+      - [0xB7EC8, bin, main_80127EC8]
+      - [0xD5254, asm, main_80145254]
+      - [0xD5598, bin, main_80145598]
+      - [0xD749C, asm, main_8014749C]
+      - [0xD8138, bin, main_80148138]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

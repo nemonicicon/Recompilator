@@ -1,0 +1,51 @@
+{
+  "game": "waynegretzkys3dhoc96",
+  "rom": {
+    "sha1": "400aa84811f1f2f6c62c756b43b54d534d5a5ec8",
+    "xxh3_64": "0xB615F7ACDFB899B4",
+    "entrypoint": "0x80001C00"
+  },
+  "sweep": {
+    "title": "Wayne Gretzky's 3D Hockey",
+    "release": "1996-10",
+    "sweep": "PASS",
+    "reached": "gameplay"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld",
+    "waynegretzkys3dhoc96.toml",
+    "waynegretzkys3dhoc96.yaml",
+    "waynegretzkys3dhoc96_overlays.txt",
+    "waynegretzkys3dhoc96_pinned.ld",
+    "waynegretzkys3dhoc96_stubs.txt"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

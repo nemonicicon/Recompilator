@@ -1,0 +1,43 @@
+# RSPRecomp config for PILOTWINGS 64 graphics microcode -- Fast3D (F3D), Nintendo launch-era.
+# DERIVED 2026-07-12 (game #2 bring-up): pilotwings' F3D is sm64's F3D with the resident
+# text 0x20 bytes LARGER (0xF60 -> 0xF80), shifting the overlay region IMEM 0x1768 -> 0x1788
+# and every branch target >= 0x1734 by +0x20. Verified by byte-diff of both ROMs' F3D text +
+# overlay descriptor tables + GBI dispatch tables.
+#   text VRAM 0x80246A30 -> ROM 0x479E0 (size 0x1000)  [OSTask fingerprint, attract demo]
+#   data VRAM 0x802503C0 -> ROM 0x51370 (size 0x800);  seg map ROM = VRAM - 0x801FF050
+text_offset = 0x479E0
+text_size = 0x1000
+text_address = 0x04001000
+text_load_offset = 0x80
+rom_file_path = "../pilotwings/baserom.z64"
+output_file_path = "rsp/f3d.cpp"
+output_function_name = "f3d"
+
+extra_indirect_branch_targets = [
+    0x1000, 0x1058, 0x1080, 0x10A8, 0x11FC, 0x1208, 0x120C, 0x1250,
+    0x1288, 0x12A0, 0x12C4, 0x12CC, 0x130C, 0x1328, 0x1348, 0x1358,
+    0x1370, 0x1378, 0x1380, 0x1384, 0x138C, 0x13A0, 0x13C4, 0x13DC,
+    0x1558, 0x1568, 0x1754, 0x1788, 0x1790, 0x1794, 0x17A4, 0x17C0,
+    0x17DC, 0x17E0, 0x1838, 0x184C, 0x1984,
+]
+
+[[overlay_slots]]
+text_address = 0x04001000
+  [[overlay_slots.overlays]]
+  offset = 0xF80
+  size = 0x88
+
+[[overlay_slots]]
+text_address = 0x04001788
+  [[overlay_slots.overlays]]
+  offset = 0x708
+  size = 0x220
+  [[overlay_slots.overlays]]
+  offset = 0x1008
+  size = 0x220
+  [[overlay_slots.overlays]]
+  offset = 0x1228
+  size = 0x198
+  [[overlay_slots.overlays]]
+  offset = 0x13C0
+  size = 0x68

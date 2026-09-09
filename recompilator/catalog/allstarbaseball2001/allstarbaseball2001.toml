@@ -1,0 +1,44 @@
+[input]
+entrypoint                = 0x80300000
+elf_path                  = "../allstarbaseball2001/build/allstarbaseball2001.elf"
+rom_file_path             = "../allstarbaseball2001/baserom.z64"
+output_func_path          = "../allstarbaseball2001pc/RecompiledFuncs"
+relocatable_sections_path = "allstarbaseball2001_overlays.txt"
+
+uses_mips3_float_mode = true
+
+function_sizes = [
+  { name = "func_80300000", size = 136 },
+  { name = "func_80300088", size = 120 },
+  { name = "func_80300274", size = 24 },
+  { name = "func_8030028C", size = 52 },
+  { name = "func_803002C0", size = 64 },
+  { name = "func_80300300", size = 48 },
+  { name = "func_80300330", size = 80 },
+  { name = "func_80300380", size = 208 },
+  { name = "func_80300450", size = 428 },
+  { name = "func_803005FC", size = 216 },
+  { name = "func_803006D4", size = 52 },
+  { name = "func_80300708", size = 60 },
+  { name = "func_80300744", size = 36 },
+  { name = "func_80300768", size = 384 },
+  { name = "func_803008E8", size = 76 },
+  { name = "func_803390A4", size = 4 },
+  { name = "func_8033AF50", size = 92 },
+  { name = "func_8033BA38", size = 4 },
+  { name = "func_8033BE44", size = 8 },
+  { name = "func_8033D0B0", size = 12 },
+  { name = "func_803BCC14", size = 96 },
+  { name = "func_803C8134", size = 32 },
+  { name = "func_803CBE88", size = 16 },
+  { name = "func_803E60BC", size = 32 },
+]
+
+exact_size_funcs = [
+
+]
+
+[patches]
+stubs = [
+
+]

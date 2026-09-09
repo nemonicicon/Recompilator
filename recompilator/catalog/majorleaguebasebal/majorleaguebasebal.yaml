@@ -1,0 +1,123 @@
+name: Major League Baseball Featuring Ken Griffey Jr. (USA)
+sha1: 54b8c97523089d92754c2582a7b7a43246947122
+options:
+  basename: majorleaguebasebal
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/majorleaguebasebal.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80025C00
+    subsegments:
+      - [0x1000, asm, main_80025C00]
+      - [0x1290, asm, main_80025E90]
+      - [0x22A4, asm, main_80026EA4]
+      - [0x2670, asm, main_80027270]
+      - [0x50B8, asm, main_80029CB8]
+      - [0x6954, bin, main_8002B554]
+      - [0x6B2C, bin, main_8002B72C]
+      - [0x79AC, bin, main_8002C5AC]
+      - [0x801C, bin, main_8002CC1C]
+      - [0x86C0, asm, main_8002D2C0]
+      - [0x8768, bin, main_8002D368]
+      - [0xDCAC, asm, main_800328AC]
+      - [0xDCE4, bin, main_800328E4]
+      - [0xE7F8, asm, main_800333F8]
+      - [0xE800, bin, main_80033400]
+      - [0x108B4, asm, main_800354B4]
+      - [0x108DC, bin, main_800354DC]
+      - [0x1233C, asm, main_80036F3C]
+      - [0x12654, bin, main_80037254]
+      - [0x12BF0, asm, main_800377F0]
+      - [0x12D04, bin, main_80037904]
+      - [0x14CC8, asm, main_800398C8]
+      - [0x14D90, bin, main_80039990]
+      - [0x15ED8, asm, main_8003AAD8]
+      - [0x15FB8, bin, main_8003ABB8]
+      - [0x1729C, asm, main_8003BE9C]
+      - [0x172C4, bin, main_8003BEC4]
+      - [0x1E250, asm, main_80042E50]
+      - [0x1E334, bin, main_80042F34]
+      - [0x2DCB8, asm, main_800528B8]
+      - [0x2DCE0, bin, main_800528E0]
+      - [0x2F0D0, asm, main_80053CD0]
+      - [0x2F0F8, bin, main_80053CF8]
+      - [0x3B6DC, asm, main_800602DC]
+      - [0x3B75C, bin, main_8006035C]
+      - [0x44448, asm, main_80069048]
+      - [0x44474, bin, main_80069074]
+      - [0x5959C, asm, main_8007E19C]
+      - [0x595BC, bin, main_8007E1BC]
+      - [0x60750, asm, main_80085350]
+      - [0x6075C, bin, main_8008535C]
+      - [0x62E88, asm, main_80087A88]
+      - [0x62EA8, bin, main_80087AA8]
+      - [0x6BB40, asm, main_80090740]
+      - [0x6BB5C, bin, main_8009075C]
+      - [0x6F570, asm, main_80094170]
+      - [0x6F5A0, bin, main_800941A0]
+      - [0x75CC0, asm, main_8009A8C0]
+      - [0x75CE4, bin, main_8009A8E4]
+      - [0x7AE50, asm, main_8009FA50]
+      - [0x7AF64, bin, main_8009FB64]
+      - [0x8F00C, asm, main_800B3C0C]
+      - [0x8F090, bin, main_800B3C90]
+      - [0x97704, asm, main_800BC304]
+      - [0x97748, bin, main_800BC348]
+      - [0x9F8CC, asm, main_800C44CC]
+      - [0x9F8D4, bin, main_800C44D4]
+      - [0xAD98C, asm, main_800D258C]
+      - [0xAD9A4, bin, main_800D25A4]
+      - [0xB67C0, asm, main_800DB3C0]
+      - [0xB68CC, bin, main_800DB4CC]
+      - [0xBA220, asm, main_800DEE20]
+      - [0xBA2A0, bin, main_800DEEA0]
+      - [0xBD0C8, asm, main_800E1CC8]
+      - [0xBD0CC, bin, main_800E1CCC]
+      - [0xBE9E0, asm, main_800E35E0]
+      - [0xBE9F0, bin, main_800E35F0]
+      - [0xC6CA8, asm, main_800EB8A8]
+      - [0xC6CAC, bin, main_800EB8AC]
+      - [0xD6C0C, asm, main_800FB80C]
+      - [0xD6C1C, bin, main_800FB81C]
+      - [0xD6F00, asm, main_800FBB00]
+      - [0xD6F10, bin, main_800FBB10]
+      - [0xDEB60, asm, main_80103760]
+      - [0xDEB88, bin, main_80103788]
+      - [0xE2AF8, asm, main_801076F8]
+      - [0xE2B5C, bin, main_8010775C]
+      - [0xF31F4, asm, main_80117DF4]
+      - [0xF32CC, bin, main_80117ECC]
+      - [0xF4BC8, asm, main_801197C8]
+      - [0xF4BCC, bin, main_801197CC]
+      - [0xF4F54, asm, main_80119B54]
+      - [0xF4F60, bin, main_80119B60]
+      - [0xF97A8, asm, main_8011E3A8]
+      - [0xF97B0, bin, main_8011E3B0]
+      - [0xFD69C, asm, main_8012229C]
+      - [0xFD6A0, bin, main_801222A0]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

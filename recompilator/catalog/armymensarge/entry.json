@@ -1,0 +1,48 @@
+{
+  "game": "armymensarge",
+  "rom": {
+    "sha1": "1824380911579424e50042d45aef4851f7ab25a7",
+    "xxh3_64": "0x459E462DB1513447",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Army Men - Sarge's Heroes (USA)"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "armymensarge.toml",
+    "armymensarge.yaml",
+    "armymensarge_overlays.txt",
+    "armymensarge_pinned.ld",
+    "armymensarge_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

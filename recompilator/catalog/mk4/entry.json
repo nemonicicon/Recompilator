@@ -1,0 +1,55 @@
+{
+  "game": "mk4",
+  "rom": {
+    "sha1": "f47d05bbd1bcadddff2ec7a21bc2e795cbef9f9b",
+    "xxh3_64": "0xE8CF19A1A1872110",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Mortal Kombat 4",
+    "release": "1998-06-24",
+    "sweep": "CAP"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "mk4.toml",
+    "mk4.yaml",
+    "mk4_overlays.txt",
+    "mk4_pinned.ld",
+    "mk4_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

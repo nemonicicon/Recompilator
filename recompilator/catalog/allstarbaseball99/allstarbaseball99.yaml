@@ -1,0 +1,111 @@
+name: All-Star Baseball 99 (USA)
+sha1: aa576624f2a66034cb0d6e621ba16a0d3beaca3a
+options:
+  basename: allstarbaseball99
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/allstarbaseball99.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80300000
+    subsegments:
+      - [0x1000, asm, main_80300000]
+      - [0x1068, asm, main_80300068]
+      - [0x2918, asm, main_80301918]
+      - [0x2EC0, asm, main_80301EC0]
+      - [0x32F4, bin, main_803022F4]
+      - [0x3744, asm, main_80302744]
+      - [0x4178, bin, main_80303178]
+      - [0x4BDC, asm, main_80303BDC]
+      - [0x51CC, bin, main_803041CC]
+      - [0x8E50, asm, main_80307E50]
+      - [0x8E84, bin, main_80307E84]
+      - [0x1225C, asm, main_8031125C]
+      - [0x12318, bin, main_80311318]
+      - [0x14AC4, asm, main_80313AC4]
+      - [0x14AD4, bin, main_80313AD4]
+      - [0x259A8, asm, main_803249A8]
+      - [0x259C4, bin, main_803249C4]
+      - [0x28CDC, asm, main_80327CDC]
+      - [0x28CF8, bin, main_80327CF8]
+      - [0x34EBC, asm, main_80333EBC]
+      - [0x34EDC, bin, main_80333EDC]
+      - [0x469B4, asm, main_803459B4]
+      - [0x469C8, bin, main_803459C8]
+      - [0x46A8C, asm, main_80345A8C]
+      - [0x46B74, bin, main_80345B74]
+      - [0x51694, asm, main_80350694]
+      - [0x51698, bin, main_80350698]
+      - [0x5AAA8, asm, main_80359AA8]
+      - [0x5AB2C, bin, main_80359B2C]
+      - [0x5BC5C, asm, main_8035AC5C]
+      - [0x5BD30, bin, main_8035AD30]
+      - [0x650B4, asm, main_803640B4]
+      - [0x6522C, bin, main_8036422C]
+      - [0x76800, asm, main_80375800]
+      - [0x76828, bin, main_80375828]
+      - [0x8B6FC, asm, main_8038A6FC]
+      - [0x8BF70, bin, main_8038AF70]
+      - [0x90CD8, asm, main_8038FCD8]
+      - [0x90E10, bin, main_8038FE10]
+      - [0x91820, asm, main_80390820]
+      - [0x9185C, bin, main_8039085C]
+      - [0x923C8, asm, main_803913C8]
+      - [0x923FC, bin, main_803913FC]
+      - [0x92520, asm, main_80391520]
+      - [0x9263C, bin, main_8039163C]
+      - [0x92AF4, asm, main_80391AF4]
+      - [0x92B14, bin, main_80391B14]
+      - [0x92CF4, asm, main_80391CF4]
+      - [0x92D48, bin, main_80391D48]
+      - [0x937A4, asm, main_803927A4]
+      - [0x93884, bin, main_80392884]
+      - [0x938E0, asm, main_803928E0]
+      - [0x939F4, bin, main_803929F4]
+      - [0xA56F8, asm, main_803A46F8]
+      - [0xA575C, bin, main_803A475C]
+      - [0xAF9D0, asm, main_803AE9D0]
+      - [0xAF9D8, bin, main_803AE9D8]
+      - [0xAFB44, asm, main_803AEB44]
+      - [0xAFB50, bin, main_803AEB50]
+      - [0xB55C8, asm, main_803B45C8]
+      - [0xB55D4, bin, main_803B45D4]
+      - [0xBCB80, asm, main_803BBB80]
+      - [0xBCBA4, bin, main_803BBBA4]
+      - [0xD2474, asm, main_803D1474]
+      - [0xD2490, bin, main_803D1490]
+      - [0xDD1F4, asm, main_803DC1F4]
+      - [0xDD204, bin, main_803DC204]
+      - [0xDDA70, asm, main_803DCA70]
+      - [0xDDA90, bin, main_803DCA90]
+      - [0xE4034, asm, main_803E3034]
+      - [0xE4040, bin, main_803E3040]
+      - [0xF9108, asm, main_803F8108]
+      - [0xF911C, bin, main_803F811C]
+      - [0xFD0C4, asm, main_803FC0C4]
+      - [0xFD0C8, bin, main_803FC0C8]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

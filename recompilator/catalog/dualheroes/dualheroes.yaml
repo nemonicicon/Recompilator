@@ -1,0 +1,55 @@
+name: Dual Heroes (USA)
+sha1: 8fd879ce53e211d33a689015a78cff3fdd39db09
+options:
+  basename: dualheroes
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/dualheroes.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x21454, asm, main_80020854]
+      - [0x21820, asm, main_80020C20]
+      - [0x31870, data, main_80030C70]
+      - [0x324C0, asm, main_800318C0]
+      - [0x40BFC, asm, main_8003FFFC]
+      - [0xBF3C0, data, main_800BE7C0]
+      - [0xC0C00, asm, main_800C0000]
+      - [0xC0C0C, data, main_800C000C]
+      - [0xC1EC4, asm, main_800C12C4]
+      - [0xC2358, data, main_800C1758]
+      - [0xC373C, asm, main_800C2B3C]
+      - [0xC3774, data, main_800C2B74]
+      - [0xCBB08, data, main_800CAF08]
+      - [0xD196C, asm, main_800D0D6C]
+      - [0xD2EFC, data, main_800D22FC]
+      - [0xD3840, asm, main_800D2C40]
+      - [0xD49D8, data, main_800D3DD8]
+      - [0x100C20, asm, main_80100020]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

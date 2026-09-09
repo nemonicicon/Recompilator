@@ -1,0 +1,55 @@
+{
+  "game": "asteroids",
+  "rom": {
+    "sha1": "329f4d560b0ba7da622edd9b84523e86e265fffe",
+    "xxh3_64": "0x38B89634DA0DBA33",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Asteroids Hyper 64",
+    "release": "1999-12-14",
+    "sweep": "—"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "asteroids.toml",
+    "asteroids.yaml",
+    "asteroids_overlays.txt",
+    "asteroids_pinned.ld",
+    "asteroids_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

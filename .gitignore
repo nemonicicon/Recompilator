@@ -1,0 +1,20 @@
+# derived from a ROM or from a build - never committed
+*.z64
+*.n64
+*.v64
+baserom*
+RecompiledFuncs/
+_ram/
+# game trees: the user's own builds, at the root and in the archive
+/archive/
+/*pc/
+build/
+build_*/
+build-*/
+_masterbuild/build/
+recompilator/launcher/build/
+*.log
+__pycache__/
+# the built program is a release artifact, not source
+/Recompilator.exe
+/*.dll

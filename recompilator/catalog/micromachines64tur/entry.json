@@ -1,0 +1,55 @@
+{
+  "game": "micromachines64tur",
+  "rom": {
+    "sha1": "9672fa010a06adf01074c9720ee46031f5d9e101",
+    "xxh3_64": "0xB74F82D15363B6E2",
+    "entrypoint": "0x80025C00"
+  },
+  "sweep": {
+    "title": "Micro Machines 64 Turbo",
+    "release": "1999-03-24",
+    "sweep": "OPEN"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "micromachines64tur.toml",
+    "micromachines64tur.yaml",
+    "micromachines64tur_overlays.txt",
+    "micromachines64tur_pinned.ld",
+    "micromachines64tur_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

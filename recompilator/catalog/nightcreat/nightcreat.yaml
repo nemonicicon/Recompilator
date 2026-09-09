@@ -1,0 +1,103 @@
+name: Nightmare Creatures (USA)
+sha1: bea6c21b3ef5950bdf8cdb255955da6c4746eea8
+options:
+  basename: nightcreat
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/nightcreat.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x1124, bin, main_80000524]
+      - [0x23BC, asm, main_800017BC]
+      - [0x2400, bin, main_80001800]
+      - [0x2800, asm, main_80001C00]
+      - [0x2C24, bin, main_80002024]
+      - [0x45A0, asm, main_800039A0]
+      - [0x162C4, bin, main_800156C4]
+      - [0x16580, asm, main_80015980]
+      - [0x2A4C4, bin, main_800298C4]
+      - [0x2A4E0, asm, main_800298E0]
+      - [0x77028, bin, main_80076428]
+      - [0x77160, asm, main_80076560]
+      - [0x7D9DC, bin, main_8007CDDC]
+      - [0x7FD60, asm, main_8007F160]
+      - [0x80E80, asm, main_80080280]
+      - [0x81E40, asm, main_80081240]
+      - [0x822E0, asm, main_800816E0]
+      - [0x82380, asm, main_80081780]
+      - [0x88820, asm, main_80087C20]
+      - [0x94770, bin, main_80093B70]
+      - [0x9708C, asm, main_8009648C]
+      - [0x97E4C, bin, main_8009724C]
+      - [0x9B400, asm, main_8009A800]
+      - [0x9B95C, bin, main_8009AD5C]
+      - [0x9CBAC, asm, main_8009BFAC]
+      - [0xA027C, bin, main_8009F67C]
+      - [0xA4948, asm, main_800A3D48]
+      - [0xA4C90, bin, main_800A4090]
+      - [0xA5368, asm, main_800A4768]
+      - [0xA57AC, bin, main_800A4BAC]
+      - [0xB7C00, asm, main_800B7000]
+      - [0xB7C1C, bin, main_800B701C]
+      - [0xBCF58, asm, main_800BC358]
+      - [0xBD448, bin, main_800BC848]
+      - [0xBE328, asm, main_800BD728]
+      - [0xBE338, bin, main_800BD738]
+      - [0xC1A0C, asm, main_800C0E0C]
+      - [0xC1BB0, bin, main_800C0FB0]
+      - [0xC20B8, asm, main_800C14B8]
+      - [0xC20E8, bin, main_800C14E8]
+      - [0xCACF0, asm, main_800CA0F0]
+      - [0xCAEB4, bin, main_800CA2B4]
+      - [0xCBD98, asm, main_800CB198]
+      - [0xCBDD4, bin, main_800CB1D4]
+      - [0xCDB64, asm, main_800CCF64]
+      - [0xCDDF0, bin, main_800CD1F0]
+      - [0xD06C4, asm, main_800CFAC4]
+      - [0xD2238, bin, main_800D1638]
+      - [0xDB2EC, asm, main_800DA6EC]
+      - [0xDB314, bin, main_800DA714]
+      - [0xDF43C, asm, main_800DE83C]
+      - [0xDF48C, bin, main_800DE88C]
+      - [0xE14EC, asm, main_800E08EC]
+      - [0xE14F0, bin, main_800E08F0]
+      - [0xE24E4, asm, main_800E18E4]
+      - [0xE253C, bin, main_800E193C]
+      - [0xE6688, asm, main_800E5A88]
+      - [0xE6780, bin, main_800E5B80]
+      - [0xE861C, asm, main_800E7A1C]
+      - [0xE862C, bin, main_800E7A2C]
+      - [0xF3C40, asm, main_800F3040]
+      - [0xF3C50, bin, main_800F3050]
+      - [0xF4B60, asm, main_800F3F60]
+      - [0xF4CE8, bin, main_800F40E8]
+      - [0xF9E5C, asm, main_800F925C]
+      - [0xF9EE8, bin, main_800F92E8]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

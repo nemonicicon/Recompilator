@@ -1,0 +1,56 @@
+{
+  "game": "battletanxglobalas",
+  "rom": {
+    "sha1": "805248fb0a0ee694cad8d7dc927b631d860dd8cf",
+    "xxh3_64": "0x9C7467E763553529",
+    "entrypoint": "0x80071000"
+  },
+  "sweep": {
+    "title": "BattleTanx: Global Assault",
+    "release": "1999-08-31",
+    "sweep": "PASS",
+    "reached": "title"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "battletanxglobalas.toml",
+    "battletanxglobalas.yaml",
+    "battletanxglobalas_overlays.txt",
+    "battletanxglobalas_pinned.ld",
+    "battletanxglobalas_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

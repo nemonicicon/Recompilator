@@ -1,0 +1,55 @@
+{
+  "game": "nflqbclub2001",
+  "rom": {
+    "sha1": "c81421bb204270ef5ddd8f60dda51cdf73482fe2",
+    "xxh3_64": "0xF681EC38662A0144",
+    "entrypoint": "0x80300000"
+  },
+  "sweep": {
+    "title": "NFL QB Club 2001",
+    "release": "2000-08-23",
+    "sweep": "—"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "nflqbclub2001.toml",
+    "nflqbclub2001.yaml",
+    "nflqbclub2001_overlays.txt",
+    "nflqbclub2001_pinned.ld",
+    "nflqbclub2001_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

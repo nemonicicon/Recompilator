@@ -1,0 +1,5 @@
+      - [0x1000, asm, boot_80000400]
+      - [0x1100, asm, main_00200500]
+      - [0xA5000, bin, main_002A4400]
+      - [0xC2000, asm, main_002C1400]
+      - [0xDE000, bin, main_002DD400]

@@ -1,0 +1,37 @@
+name: Wayne Gretzky's 3D Hockey (USA)
+sha1: 400aa84811f1f2f6c62c756b43b54d534d5a5ec8
+options:
+  basename: waynegretzkys3dhoc96
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/waynegretzkys3dhoc96.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80001C00
+    subsegments:
+      - [0x1000, asm, main_80001C00]
+  - name: assets
+    type: bin
+    start: 0xC0000
+  - [0x800000]

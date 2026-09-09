@@ -1,0 +1,101 @@
+name: 1080 Snowboarding (USA)
+sha1: 79cd1166c365e5809dec9b62e6d40d6032d5db3a
+options:
+  basename: g1080snowboarding
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/g1080snowboarding.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: boot
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, boot]   # [attempt 2 2026-09-03] boot stub 0x80000400..0x8000A260: RAM == ROM (native entry; recomp_entrypoint lives here)
+      - [0xAE60, bin, boot_rewritten]   # [attempt 2 2026-09-03] 0x8000A260..0x80065240 is REWRITTEN at runtime (RAM != ROM, 0 prologues in RAM = data): fiction in ROM -> bin
+  - name: data_pre
+    type: bin
+    start: 0x65E40
+  - name: ovl1
+    type: code
+    start: 0xD9FE44
+    vram: 0x80065240
+    subsegments:
+      - [0xD9FE44, bin, ovl1]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: toc1
+    type: bin
+    start: 0xDA23E4
+  - name: ovl2
+    type: code
+    start: 0xDA23F0
+    vram: 0x800677E0
+    subsegments:
+      - [0xDA23F0, bin, ovl2]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: toc2
+    type: bin
+    start: 0xDD0A60
+  - name: ovl3
+    type: code
+    start: 0xDD0A6C
+    vram: 0x80095E50
+    subsegments:
+      - [0xDD0A6C, bin, ovl3]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: toc3
+    type: bin
+    start: 0xE5A37C
+  - name: ovl4
+    type: code
+    start: 0xE5A388
+    vram: 0x8011F770
+    subsegments:
+      - [0xE5A388, bin, ovl4]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: toc4
+    type: bin
+    start: 0xE620E0
+  - name: ovl5
+    type: code
+    start: 0xE620EC
+    vram: 0x801274C8
+    subsegments:
+      - [0xE620EC, bin, ovl5]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: toc5
+    type: bin
+    start: 0xE8F980
+  - name: ovl6
+    type: code
+    start: 0xE8F98C
+    vram: 0x80154D60
+    subsegments:
+      - [0xE8F98C, bin, ovl6]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: toc6
+    type: bin
+    start: 0xE95944
+  - name: ovl7
+    type: code
+    start: 0xE95950
+    vram: 0x8015AD18
+    subsegments:
+      - [0xE95950, bin, ovl7]   # [attempt 2 2026-09-03] stored UNLINKED (toc relocs applied at load): ROM bytes are fiction; the RAM set carries the relocated code
+  - name: assets
+    type: bin
+    start: 0xE98488
+  - [0x1000000]

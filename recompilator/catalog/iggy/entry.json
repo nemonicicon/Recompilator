@@ -1,0 +1,51 @@
+{
+  "game": "iggy",
+  "rom": {
+    "sha1": "1a32230e0ef147b3c8c07ece5aec96458286b4af",
+    "xxh3_64": "0xA1F2FC099E03472B",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Iggy's Reckin' Balls",
+    "release": "1998-06",
+    "sweep": "PASS",
+    "reached": "gameplay"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "iggy.toml",
+    "iggy.yaml",
+    "iggy_overlays.txt",
+    "iggy_pinned.ld",
+    "iggy_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

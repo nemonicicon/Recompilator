@@ -1,0 +1,102 @@
+[input]
+entrypoint                = 0x80000400
+elf_path                  = "../wwfattitude/build/wwfattitude.elf"
+rom_file_path             = "../wwfattitude/baserom.z64"
+output_func_path          = "../wwfattitudepc/RecompiledFuncs"
+relocatable_sections_path = "wwfattitude_overlays.txt"
+
+uses_mips3_float_mode = true
+
+function_sizes = [
+  { name = "func_80000400", size = 240 },
+  { name = "func_800004F0", size = 112 },
+  { name = "func_80000560", size = 112 },
+  { name = "func_800005D0", size = 428 },
+  { name = "func_8000077C", size = 180 },
+  { name = "func_80000830", size = 52 },
+  { name = "func_80000864", size = 60 },
+  { name = "func_800008A0", size = 36 },
+  { name = "func_800008C4", size = 360 },
+  { name = "func_80000A2C", size = 36 },
+  { name = "func_80009500", size = 624 },
+  { name = "func_80009770", size = 2528 },
+  { name = "func_8000A150", size = 16 },
+  { name = "func_8000A160", size = 16 },
+  { name = "func_8000A170", size = 16 },
+  { name = "func_8000A180", size = 464 },
+  { name = "func_8000A350", size = 16 },
+  { name = "func_8000A360", size = 16 },
+  { name = "func_8000A370", size = 16 },
+  { name = "func_8000A380", size = 284 },
+  { name = "func_8000A49C", size = 124 },
+  { name = "func_8000A518", size = 56 },
+  { name = "func_8000A550", size = 16 },
+  { name = "func_8000A560", size = 16 },
+  { name = "func_8000A570", size = 16 },
+  { name = "func_8000A580", size = 392 },
+  { name = "func_8000A708", size = 76 },
+  { name = "func_8000A754", size = 20 },
+  { name = "func_8000A768", size = 20 },
+  { name = "func_8000A77C", size = 20 },
+  { name = "func_8000A790", size = 28 },
+  { name = "func_8000A7AC", size = 16 },
+  { name = "func_8000A7BC", size = 20 },
+  { name = "func_8000A9CC", size = 20 },
+  { name = "func_8000A9E0", size = 4 },
+  { name = "func_8000A9E4", size = 16 },
+  { name = "func_8000A9F4", size = 16 },
+  { name = "func_8000AA04", size = 4 },
+  { name = "func_8000AA08", size = 12 },
+  { name = "func_8000AA14", size = 560 },
+  { name = "func_8000AC44", size = 20 },
+  { name = "func_8000AC58", size = 16 },
+  { name = "func_8000AC68", size = 4 },
+  { name = "func_8000AC6C", size = 12 },
+  { name = "func_8000AC78", size = 8 },
+  { name = "func_8000AC80", size = 8 },
+  { name = "func_8000AC88", size = 556 },
+  { name = "func_8000AEB4", size = 20 },
+  { name = "func_8000AEC8", size = 20 },
+  { name = "func_8000AEDC", size = 12 },
+  { name = "func_8000AEE8", size = 8 },
+  { name = "func_8000AEF0", size = 8 },
+  { name = "func_8000AEF8", size = 16 },
+  { name = "func_8000AF08", size = 16 },
+  { name = "func_8000AF18", size = 628 },
+  { name = "func_8000B18C", size = 16 },
+  { name = "func_8000B19C", size = 16 },
+  { name = "func_8000B1AC", size = 16 },
+  { name = "func_8000B1BC", size = 552 },
+  { name = "func_8000B3E4", size = 16 },
+  { name = "func_8000B3F4", size = 16 },
+  { name = "func_8000B404", size = 16 },
+  { name = "func_8000B414", size = 464 },
+  { name = "func_8000B5E4", size = 16 },
+  { name = "func_8000B5F4", size = 16 },
+  { name = "func_8000B604", size = 16 },
+  { name = "func_8000B614", size = 672 },
+  { name = "func_8000B8B4", size = 16 },
+  { name = "func_8000B8C4", size = 16 },
+  { name = "func_8000B8D4", size = 24 },
+  { name = "func_8000D898", size = 24 },
+  { name = "func_80015048", size = 16 },
+  { name = "func_8002C06C", size = 112 },
+  { name = "func_80030588", size = 48 },
+  { name = "func_8003D7AC", size = 96 },
+  { name = "func_80053CF4", size = 32 },
+  { name = "func_80073DA8", size = 48 },
+  { name = "func_80082128", size = 16 },
+  { name = "func_800A8310", size = 16 },
+  { name = "func_800D4944", size = 16 },
+]
+
+exact_size_funcs = [
+
+]
+
+[patches]
+stubs = [
+  "func_8000A9CC",
+  "func_8000AC44",
+  "func_800A8310",
+]

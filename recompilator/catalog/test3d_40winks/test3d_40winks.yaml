@@ -1,0 +1,153 @@
+name: 3D Model RGB Test Program (40 Winks engine) (USA)
+sha1: c9522561b622d2eb22e57aadbb43da6cf71d458d
+options:
+  basename: test3d_40winks
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/test3d_40winks.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80210000
+    subsegments:
+      - [0x1000, asm, main_80210000]
+      - [0x22EC, asm, main_802112EC]
+      - [0x2548, asm, main_80211548]
+      - [0x2980, asm, main_80211980]
+      - [0xF420, asm, main_8021E420]
+      - [0x10098, asm, main_8021F098]
+      - [0x10468, asm, main_8021F468]
+      - [0x11EC8, asm, main_80220EC8]
+      - [0x13B38, asm, main_80222B38]
+      - [0x142FC, asm, main_802232FC]
+      - [0x14978, asm, main_80223978]
+      - [0x14F84, asm, main_80223F84]
+      - [0x3C590, asm, main_8024B590]
+      - [0x3C818, asm, main_8024B818]
+      - [0x3CAA0, bin, main_8024BAA0]
+      - [0x3CD28, asm, main_8024BD28]
+      - [0x3CFB0, asm, main_8024BFB0]
+      - [0x3D238, asm, main_8024C238]
+      - [0x406F4, asm, main_8024F6F4]
+      - [0x41B34, asm, main_80250B34]
+      - [0x43C44, bin, main_80252C44]
+      - [0x4460C, asm, main_8025360C]
+      - [0x44CDC, asm, main_80253CDC]
+      - [0x4859C, bin, main_8025759C]
+      - [0x48864, asm, main_80257864]
+      - [0x48904, bin, main_80257904]
+      - [0x48934, asm, main_80257934]
+      - [0x4896C, bin, main_8025796C]
+      - [0x48C54, asm, main_80257C54]
+      - [0x49D8C, bin, main_80258D8C]
+      - [0x4A124, asm, main_80259124]
+      - [0x4A16C, bin, main_8025916C]
+      - [0x4A5B4, asm, main_802595B4]
+      - [0x4BA14, bin, main_8025AA14]
+      - [0x4BD3C, asm, main_8025AD3C]
+      - [0x4C6EC, bin, main_8025B6EC]
+      - [0x4C8A4, asm, main_8025B8A4]
+      - [0x4C90C, bin, main_8025B90C]
+      - [0x4C944, asm, main_8025B944]
+      - [0x4C964, bin, main_8025B964]
+      - [0x4C9D4, asm, main_8025B9D4]
+      - [0x4CE0C, asm, main_8025BE0C]
+      - [0x4D24C, asm, main_8025C24C]
+      - [0x4FBDC, bin, main_8025EBDC]
+      - [0x50144, asm, main_8025F144]
+      - [0x50B14, bin, main_8025FB14]
+      - [0x510AC, asm, main_802600AC]
+      - [0x51C6C, bin, main_80260C6C]
+      - [0x51D64, asm, main_80260D64]
+      - [0x51D94, bin, main_80260D94]
+      - [0x51E8C, asm, main_80260E8C]
+      - [0x549A4, bin, main_802639A4]
+      - [0x54AD4, asm, main_80263AD4]
+      - [0x54B74, bin, main_80263B74]
+      - [0x54D4C, asm, main_80263D4C]
+      - [0x55394, bin, main_80264394]
+      - [0x55F9C, asm, main_80264F9C]
+      - [0x568CC, bin, main_802658CC]
+      - [0x5694C, asm, main_8026594C]
+      - [0x56954, bin, main_80265954]
+      - [0x5699C, asm, main_8026599C]
+      - [0x56BFC, asm, main_80265BFC]
+      - [0x56FBC, asm, main_80265FBC]
+      - [0x570EC, asm, main_802660EC]
+      - [0x5795C, bin, main_8026695C]
+      - [0x57A34, asm, main_80266A34]
+      - [0x57E8C, asm, main_80266E8C]
+      - [0x58064, asm, main_80267064]
+      - [0x582E4, asm, main_802672E4]
+      - [0x5848C, bin, main_8026748C]
+      - [0x584B4, asm, main_802674B4]
+      - [0x586D4, asm, main_802676D4]
+      - [0x586EC, asm, main_802676EC]
+      - [0x5871C, asm, main_8026771C]
+      - [0x58A44, asm, main_80267A44]
+      - [0x58B44, asm, main_80267B44]
+      - [0x58B9C, asm, main_80267B9C]
+      - [0x58C34, asm, main_80267C34]
+      - [0x58CD4, asm, main_80267CD4]
+      - [0x59364, asm, main_80268364]
+      - [0x595A4, asm, main_802685A4]
+      - [0x5973C, asm, main_8026873C]
+      - [0x597D4, asm, main_802687D4]
+      - [0x5B7B4, asm, main_8026A7B4]
+      - [0x5BB2C, asm, main_8026AB2C]
+      - [0x5DB34, asm, main_8026CB34]
+      - [0x5DDBC, asm, main_8026CDBC]
+      - [0xB13E0, asm, main_802C03E0]
+      - [0xD151C, bin, main_802E051C]
+      - [0xDA258, asm, main_802E9258]
+      - [0xDA274, bin, main_802E9274]
+      - [0xDF4CC, asm, main_802EE4CC]
+      - [0xDF4E4, bin, main_802EE4E4]
+      - [0xEA9E4, asm, main_802F99E4]
+      - [0xEABC4, bin, main_802F9BC4]
+      - [0xF2114, asm, main_80301114]
+      - [0xF2118, bin, main_80301118]
+      - [0xF27C8, asm, main_803017C8]
+      - [0xF27D8, bin, main_803017D8]
+      - [0xF2C04, asm, main_80301C04]
+      - [0xF2C18, bin, main_80301C18]
+      - [0xF3414, asm, main_80302414]
+      - [0xF3420, bin, main_80302420]
+      - [0xF3810, asm, main_80302810]
+      - [0xF3818, bin, main_80302818]
+      - [0xF381C, asm, main_8030281C]
+      - [0xF3824, bin, main_80302824]
+      - [0xF3C20, asm, main_80302C20]
+      - [0xF3C28, bin, main_80302C28]
+      - [0xF401C, asm, main_8030301C]
+      - [0xF4038, bin, main_80303038]
+      - [0xF4430, asm, main_80303430]
+      - [0xF4444, bin, main_80303444]
+      - [0xF4834, asm, main_80303834]
+      - [0xF4840, bin, main_80303840]
+      - [0xF4C48, asm, main_80303C48]
+      - [0xF4C58, bin, main_80303C58]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

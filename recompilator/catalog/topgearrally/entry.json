@@ -1,0 +1,56 @@
+{
+  "game": "topgearrally",
+  "rom": {
+    "sha1": "bfc51f086ebdb78904dc24ad0c3a2d946e26d022",
+    "xxh3_64": "0x19277F014FBF9D6E",
+    "entrypoint": "0x80200000"
+  },
+  "sweep": {
+    "title": "Top Gear Rally",
+    "release": "1997-10",
+    "sweep": "PASS",
+    "reached": "title"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "topgearrally.toml",
+    "topgearrally.yaml",
+    "topgearrally_overlays.txt",
+    "topgearrally_pinned.ld",
+    "topgearrally_stubs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

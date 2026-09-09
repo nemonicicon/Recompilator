@@ -1,0 +1,101 @@
+name: Duke Nukem 64 (USA)
+sha1: 98d6778004becc672eba0a5e887f6e3f3d1b5c15
+options:
+  basename: dukenukem64
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/dukenukem64.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x8004B400
+    subsegments:
+      - [0x1000, asm, main_8004B400]
+      - [0x10B4, asm, main_8004B4B4]
+      - [0x7A164, asm, main_800C4564]
+      - [0x7A530, asm, main_800C4930]
+      - [0x9189C, asm, main_800DBC9C]
+      - [0x9357C, bin, main_800DD97C]
+      - [0x938E0, asm, main_800DDCE0]
+      - [0x940C0, bin, main_800DE4C0]
+      - [0x94CAC, asm, main_800DF0AC]
+      - [0x9502C, bin, main_800DF42C]
+      - [0x95294, asm, main_800DF694]
+      - [0x95A64, bin, main_800DFE64]
+      - [0x960B0, asm, main_800E04B0]
+      - [0x960BC, bin, main_800E04BC]
+      - [0x96110, asm, main_800E0510]
+      - [0x97230, bin, main_800E1630]
+      - [0x974D4, asm, main_800E18D4]
+      - [0x98130, bin, main_800E2530]
+      - [0x982F0, asm, main_800E26F0]
+      - [0x99994, bin, main_800E3D94]
+      - [0x99BA4, asm, main_800E3FA4]
+      - [0x9A59C, bin, main_800E499C]
+      - [0x9A8E0, asm, main_800E4CE0]
+      - [0x9A970, bin, main_800E4D70]
+      - [0x9A998, asm, main_800E4D98]
+      - [0x9AAFC, bin, main_800E4EFC]
+      - [0x9ACB8, asm, main_800E50B8]
+      - [0x9ACF0, bin, main_800E50F0]
+      - [0x9AE94, asm, main_800E5294]
+      - [0x9AF48, bin, main_800E5348]
+      - [0x9B150, asm, main_800E5550]
+      - [0x9B508, bin, main_800E5908]
+      - [0xA1FFC, asm, main_800EC3FC]
+      - [0xA35A4, bin, main_800ED9A4]
+      - [0xA3F98, asm, main_800EE398]
+      - [0xA3FF4, bin, main_800EE3F4]
+      - [0xA4138, asm, main_800EE538]
+      - [0xA42FC, bin, main_800EE6FC]
+      - [0xA43DC, asm, main_800EE7DC]
+      - [0xA4414, asm, main_800EE814]
+      - [0xA44BC, asm, main_800EE8BC]
+      - [0xAFE38, asm, main_800FA238]
+      - [0xB35C0, asm, main_800FD9C0]
+      - [0xB4DCC, asm, main_800FF1CC]
+      - [0xB52EC, bin, main_800FF6EC]
+      - [0xB6788, bin, main_80100B88]
+      - [0xB6AB0, asm, main_80100EB0]
+      - [0xB713C, bin, main_8010153C]
+      - [0xB7714, bin, main_80101B14]
+      - [0xB7AC8, asm, main_80101EC8]
+      - [0xB9194, asm, main_80103594]
+      - [0xBC2C0, bin, main_801066C0]
+      - [0xBD290, bin, main_80107690]
+      - [0xC0600, bin, main_8010AA00]
+      - [0xC1050, bin, main_8010B450]
+      - [0xC4A0C, bin, main_8010EE0C]
+      - [0xC8CA4, bin, main_801130A4]
+      - [0xCE200, bin, main_80118600]
+      - [0xD4720, bin, main_8011EB20]
+      - [0xD61AC, bin, main_801205AC]
+      - [0xD91F8, asm, main_801235F8]
+      - [0xD9BF4, asm, main_80123FF4]
+      - [0xD9C88, bin, main_80124088]
+      - [0xE5FE8, asm, main_801303E8]
+      - [0xE604C, bin, main_8013044C]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

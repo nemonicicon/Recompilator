@@ -1,0 +1,55 @@
+{
+  "game": "ready2rumbleboxing1",
+  "rom": {
+    "sha1": "42ad558c20dda72e9383323960cd1fd591122052",
+    "xxh3_64": "0xE14D3CDFDDD7524E",
+    "entrypoint": "0x80026C00"
+  },
+  "sweep": {
+    "title": "Ready 2 Rumble Boxing: Round 2",
+    "release": "2000-11-13",
+    "sweep": "—"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "ready2rumbleboxing1.toml",
+    "ready2rumbleboxing1.yaml",
+    "ready2rumbleboxing1_overlays.txt",
+    "ready2rumbleboxing1_pinned.ld",
+    "ready2rumbleboxing1_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

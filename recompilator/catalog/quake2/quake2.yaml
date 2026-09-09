@@ -1,0 +1,96 @@
+name: Quake II (USA)
+sha1: 2edb00e602e7c2813a5d6a04dfec80487627237a
+options:
+  basename: quake2
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/quake2.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x10AC, asm, main_800004AC]
+      - [0x5C11C, asm, main_8005B51C]
+      - [0x5C700, asm, main_8005BB00]
+      - [0x64020, data, main_80063420]
+      - [0x64928, data, main_80063D28]
+      - [0x65054, asm, main_80064454]
+      - [0x65A30, asm, main_80064E30]
+      - [0x66B48, asm, main_80065F48]
+      - [0x67848, asm, main_80066C48]
+      - [0x69B80, asm, main_80068F80]
+      - [0x6AD90, asm, main_8006A190]
+      - [0x6C024, asm, main_8006B424]
+      - [0x6CFC8, data, main_8006C3C8]
+      - [0x6D690, asm, main_8006CA90]
+      - [0x6E220, data, main_8006D620]
+      - [0x6E720, asm, main_8006DB20]
+      - [0x6EF20, data, main_8006E320]
+      - [0x6F370, asm, main_8006E770]
+      - [0x6F3EC, asm, main_8006E7EC]
+      - [0x6F9F0, asm, main_8006EDF0]
+      - [0x6FA6C, asm, main_8006EE6C]
+      - [0x719D0, data, main_80070DD0]
+      - [0x724B4, asm, main_800718B4]
+      - [0x727C0, data, main_80071BC0]
+      - [0x72F30, data, main_80072330]
+      - [0x7399C, data, main_80072D9C]
+      - [0x74F2C, data, main_8007432C]
+      - [0x7637C, data, main_8007577C]
+      - [0x7915C, data, main_8007855C]
+      - [0x7C20C, data, main_8007B60C]
+      - [0x85B3C, data, main_80084F3C]
+      - [0x875B0, data, main_800869B0]
+      - [0x8909C, data, main_8008849C]
+      - [0x8A3B8, data, main_800897B8]
+      - [0x8A61C, asm, main_80089A1C]
+      - [0x8A640, data, main_80089A40]
+      - [0x8AE3C, data, main_8008A23C]
+      - [0x8BD1C, data, main_8008B11C]
+      - [0x8C850, data, main_8008BC50]
+      - [0x8E330, data, main_8008D730]
+      - [0x8EFF0, asm, main_8008E3F0]
+      - [0x8F988, data, main_8008ED88]
+      - [0x92F40, asm, main_80092340]
+      - [0x92F98, data, main_80092398]
+      - [0x95398, asm, main_80094798]
+      - [0x95414, data, main_80094814]
+      - [0x95F04, data, main_80095304]
+      - [0x96838, data, main_80095C38]
+      - [0x96CD8, data, main_800960D8]
+      - [0x984AC, data, main_800978AC]
+      - [0xA4178, data, main_800A3578]
+      - [0xA5424, asm, main_800A4824]
+      - [0xA5438, data, main_800A4838]
+      - [0xA7BAC, data, main_800A6FAC]
+      - [0xAA200, data, main_800A9600]
+      - [0xCCAD4, asm, main_800CBED4]
+      - [0xCCAF0, data, main_800CBEF0]
+      - [0xE15D8, asm, main_800E09D8]
+      - [0xE1614, data, main_800E0A14]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

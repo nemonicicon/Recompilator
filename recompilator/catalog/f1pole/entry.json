@@ -1,0 +1,52 @@
+{
+  "game": "f1pole",
+  "rom": {
+    "sha1": "6e6bdaefc9980f066cd2abc5fa7f29f2353ca8b1",
+    "xxh3_64": "0x179F0BEC46A7FA7A",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "F1 Pole Position 64",
+    "release": "1997-09-30",
+    "sweep": "PASS",
+    "reached": "gameplay"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_ignore.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "f1pole.toml",
+    "f1pole.yaml",
+    "f1pole_overlays.txt",
+    "f1pole_pinned.ld",
+    "f1pole_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

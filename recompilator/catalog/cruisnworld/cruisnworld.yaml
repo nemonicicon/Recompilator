@@ -1,0 +1,89 @@
+name: Cruis'n World (USA)
+sha1: 6da1a6a2bda687d50e798d80c342948ad1738202
+options:
+  basename: cruisnworld
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/cruisnworld.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x802AD400
+    subsegments:
+      - [0x1000, asm, main_802AD400]
+      - [0x10C0, asm, main_802AD4C0]
+      - [0x6DEE0, asm, main_8031A2E0]
+      - [0x6E080, asm, main_8031A480]
+      - [0x6E2E0, asm, main_8031A6E0]
+      - [0x71414, asm, main_8031D814]
+      - [0x71508, asm, main_8031D908]
+      - [0x71840, asm, main_8031DC40]
+      - [0x72870, asm, main_8031EC70]
+      - [0x733E8, asm, main_8031F7E8]
+      - [0x73630, asm, main_8031FA30]
+      - [0x73DB0, asm, main_803201B0]
+      - [0x74954, asm, main_80320D54]
+      - [0x75A10, asm, main_80321E10]
+      - [0x76D20, asm, main_80323120]
+      - [0x76FD0, asm, main_803233D0]
+      - [0x77140, asm, main_80323540]
+      - [0x77724, asm, main_80323B24]
+      - [0x77B70, asm, main_80323F70]
+      - [0x77CD0, asm, main_803240D0]
+      - [0x77FF0, asm, main_803243F0]
+      - [0x788E0, asm, main_80324CE0]
+      - [0x78920, asm, main_80324D20]
+      - [0x7EC70, asm, main_8032B070]
+      - [0x7ECC0, asm, main_8032B0C0]
+      - [0x7EF50, asm, main_8032B350]
+      - [0x7FCBC, asm, main_8032C0BC]
+      - [0x7FFAC, asm, main_8032C3AC]
+      - [0x803C0, asm, main_8032C7C0]
+      - [0x82780, asm, main_8032EB80]
+      - [0x8607C, asm, main_8033247C]
+      - [0x91748, asm, main_8033DB48]
+      - [0x9175C, bin, main_8033DB5C]
+      - [0x92154, asm, main_8033E554]
+      - [0x96F64, bin, main_80343364]
+      - [0x97400, asm, main_80343800]
+      - [0xA0950, asm, main_8034CD50]
+      - [0xA146C, bin, main_8034D86C]
+      - [0xA2748, asm, main_8034EB48]
+      - [0xA6720, bin, main_80352B20]
+      - [0xA7E88, asm, main_80354288]
+      - [0xADDB4, asm, main_8035A1B4]
+      - [0xB39E8, asm, main_8035FDE8]
+      - [0xB5188, asm, main_80361588]
+      - [0xBF8F8, bin, main_8036BCF8]
+      - [0xD6C14, asm, main_80383014]
+      - [0xD6C18, bin, main_80383018]
+      - [0xD7838, asm, main_80383C38]
+      - [0xD783C, bin, main_80383C3C]
+      - [0xE73F8, bin, main_803937F8]
+      - [0xE99F0, bin, main_80395DF0]
+      - [0xF8558, bin, main_803A4958]
+      - [0xF8BE0, bin, main_803A4FE0]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

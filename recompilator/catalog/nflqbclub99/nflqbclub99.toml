@@ -1,0 +1,48 @@
+[input]
+entrypoint                = 0x80300000
+elf_path                  = "../nflqbclub99/build/nflqbclub99.elf"
+rom_file_path             = "../nflqbclub99/baserom.z64"
+output_func_path          = "../nflqbclub99pc/RecompiledFuncs"
+relocatable_sections_path = "nflqbclub99_overlays.txt"
+
+uses_mips3_float_mode = true
+
+function_sizes = [
+  { name = "func_80300000", size = 64 },
+  { name = "func_80300040", size = 336 },
+  { name = "func_80300190", size = 24 },
+  { name = "func_803001A8", size = 52 },
+  { name = "func_803001DC", size = 64 },
+  { name = "func_8030021C", size = 48 },
+  { name = "func_8030024C", size = 84 },
+  { name = "func_803002A0", size = 112 },
+  { name = "func_80300310", size = 364 },
+  { name = "func_8030047C", size = 164 },
+  { name = "func_80300520", size = 40 },
+  { name = "func_80300548", size = 56 },
+  { name = "func_80300580", size = 340 },
+  { name = "func_803006D4", size = 68 },
+  { name = "func_80300718", size = 288 },
+  { name = "func_80300838", size = 80 },
+  { name = "func_8032517C", size = 112 },
+  { name = "func_8032E5C8", size = 16 },
+  { name = "func_80345114", size = 80 },
+  { name = "func_8035E0F0", size = 16 },
+  { name = "func_8037AFB8", size = 16 },
+  { name = "func_8037EE78", size = 64 },
+  { name = "func_8039C4C8", size = 32 },
+  { name = "func_803B77C0", size = 144 },
+  { name = "func_803BA880", size = 16 },
+  { name = "func_803C7B14", size = 96 },
+  { name = "func_803DC338", size = 32 },
+  { name = "func_803F41BC", size = 48 },
+]
+
+exact_size_funcs = [
+
+]
+
+[patches]
+stubs = [
+
+]

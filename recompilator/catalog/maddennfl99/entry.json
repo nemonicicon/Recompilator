@@ -1,0 +1,56 @@
+{
+  "game": "maddennfl99",
+  "rom": {
+    "sha1": "2e8595c6ea0267a0344c0e203b4b08f00a42b13a",
+    "xxh3_64": "0x6160B43BCD1D7239",
+    "entrypoint": "0x80200400"
+  },
+  "sweep": {
+    "title": "Madden NFL 99",
+    "release": "1998-09",
+    "sweep": "PASS",
+    "reached": "title"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "maddennfl99.toml",
+    "maddennfl99.yaml",
+    "maddennfl99_overlays.txt",
+    "maddennfl99_pinned.ld",
+    "maddennfl99_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

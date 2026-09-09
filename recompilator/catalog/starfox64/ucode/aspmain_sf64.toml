@@ -1,0 +1,26 @@
+# RSPRecomp config for STAR FOX 64's audio microcode (aspMain variant, 32-command table).
+# 2026-07-24 (the sound rung): SF64's audio build is NOT the shared CV64/SM64 aspMain —
+# the organ's first-run miss lines named it (key 1DDD6BF95F652F46, ucode@0x80000520).
+# Bytes captured LIVE via RECOMP_UCODE_DUMP (reva, /tmp/sf64_aspmain_text.bin) and located
+# uniquely in ROM at 0x1120 (full 0x2000 dump == ROM, so the boot image is ROM-contiguous;
+# audio text sits between IPL3 and the NoN-1.22 gfx text @0x2010).
+text_offset = 0x1120
+# Last nonzero instruction ends at text+0xEE0 (zero padding from there to the gfx text).
+text_size = 0xEE0
+# Same rspboot convention as every aspMain: ucode DMA'd into IMEM at +0x80 (task header first),
+# jump-table targets are IMEM-PC absolute — 0x1080 base (cv64 session-15 lesson).
+text_address = 0x04001080
+rom_file_path = "../starfox64/baserom.z64"
+output_file_path = "RecompiledFuncs/aspmain_sf64.cpp"
+output_function_name = "aspMain_sf64"
+
+# Audio command jump table: dispatch is `lh $2, 0x10($2); jr $2` (text+0x74). Table found in
+# ROM at 0xbfa60+0x10 (aspMainData region, just below the gfx data @0xC0550): 32 halfword
+# targets, entry 0 = 0x1104 (noop handler, repeated at unused slots). All verified in-range
+# [0x1080, 0x1F60), word-aligned, unique table site in the ROM.
+extra_indirect_branch_targets = [
+    0x1104, 0x12CC, 0x11C8, 0x1104, 0x1E78, 0x1554, 0x1EE8, 0x1104,
+    0x11F8, 0x1104, 0x1284, 0x1B10, 0x1B2C, 0x120C, 0x1D1C, 0x12BC,
+    0x1804, 0x18B0, 0x1A70, 0x1904, 0x1AD4, 0x1AF8, 0x1A98, 0x1B98,
+    0x1C48, 0x1C9C, 0x184C,
+]

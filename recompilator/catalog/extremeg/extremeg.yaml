@@ -1,0 +1,70 @@
+name: Extreme-G (USA)
+sha1: eb9b273431970a6124319a8fd125f0b2cacd8966
+options:
+  basename: extremeg
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/extremeg.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x8004B400
+    subsegments:
+      - [0x1000, asm, main_8004B400]
+      - [0x14A0, bin, main_8004B8A0]
+      - [0x388C, asm, main_8004DC8C]
+      - [0x3AC0, bin, main_8004DEC0]
+      - [0x1473C, asm, main_8005EB3C]
+      - [0x147E8, bin, main_8005EBE8]
+      - [0x25574, asm, main_8006F974]
+      - [0x25650, bin, main_8006FA50]
+      - [0x266B8, asm, main_80070AB8]
+      - [0x266C8, bin, main_80070AC8]
+      - [0x2961C, asm, main_80073A1C]
+      - [0x29624, bin, main_80073A24]
+      - [0x2C230, asm, main_80076630]
+      - [0x2C2B4, bin, main_800766B4]
+      - [0x43810, asm, main_8008DC10]
+      - [0x43830, bin, main_8008DC30]
+      - [0x75BF4, asm, main_800BFFF4]
+      - [0x75C58, bin, main_800C0058]
+      - [0x8E1B4, asm, main_800D85B4]
+      - [0x8E1D8, bin, main_800D85D8]
+      - [0x93198, asm, main_800DD598]
+      - [0x931DC, bin, main_800DD5DC]
+      - [0x9BB28, asm, main_800E5F28]
+      - [0x9BB44, bin, main_800E5F44]
+      - [0xB04A8, asm, main_800FA8A8]
+      - [0xB0520, bin, main_800FA920]
+      - [0xB0AF4, asm, main_800FAEF4]
+      - [0xB0B1C, bin, main_800FAF1C]
+      - [0xC3964, asm, main_8010DD64]
+      - [0xC3980, bin, main_8010DD80]
+      - [0xCB4F0, asm, main_801158F0]
+      - [0xCB514, bin, main_80115914]
+      - [0xE0BE4, asm, main_8012AFE4]
+      - [0xE0BFC, bin, main_8012AFFC]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

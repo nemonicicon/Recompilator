@@ -1,0 +1,18 @@
+build/
+temp/
+.vscode/
+
+*.o
+*.elf
+*.z64
+*.n64
+*.v64
+.DS_Store
+
+# 2026-07-15 preservation pass
+**/softrdp_frames/
+softrdp_frames/
+
+# built tools are never tracked
+softrdp/tools/*.exe
+softrdp/tools/*.obj

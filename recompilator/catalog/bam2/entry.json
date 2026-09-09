@@ -1,0 +1,55 @@
+{
+  "game": "bam2",
+  "rom": {
+    "sha1": "8f1aad51e733958d1a9a7a0cb7516fc7a293ca7b",
+    "xxh3_64": "0x3912CA550B00C3DD",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Bust-A-Move 2 Arcade Edition",
+    "release": "1998-04-30",
+    "sweep": "CAP"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "bam2.toml",
+    "bam2.yaml",
+    "bam2_overlays.txt",
+    "bam2_pinned.ld",
+    "bam2_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

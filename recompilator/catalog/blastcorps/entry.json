@@ -1,0 +1,56 @@
+{
+  "game": "blastcorps",
+  "rom": {
+    "sha1": "185a6ef7ba1adb243278062c81a7d4e119bda58c",
+    "xxh3_64": "0x24463BFD293803A8",
+    "entrypoint": "0x8021ED00"
+  },
+  "sweep": {
+    "title": "Blast Corps",
+    "release": "1997-02-24",
+    "sweep": "CAP"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_data_ranges.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "blastcorps.toml",
+    "blastcorps.yaml",
+    "blastcorps_overlays.txt",
+    "blastcorps_pinned.ld",
+    "blastcorps_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

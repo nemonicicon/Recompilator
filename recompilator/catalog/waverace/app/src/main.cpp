@@ -1,0 +1,516 @@
+/**
+ * main.cpp — Wave Race 64 PC port entry point (waveracepc). Rebuilt on the template scaffold
+ * for the console seam port from snowkidspc (2026-07-31 batch); identity, recon notes, the
+ * wave-1 purge note and the [watchdog] probe carried over from the previous Windows-only file.
+ *
+ * The MINIMAL game profile (the sm64pc/lodpc pattern): ROM identity/validation,
+ * recompiled-section registration, renderer/audio/input wiring, the entrypoint, a
+ * crash handler, and diagnostic logging. Every game-specific value below comes from
+ * recon (ROM header, XXH3, entrypoint) — there are NO addresses from any other game.
+ *
+ * RECON: rom 0x1000 -> vram 0x80046800 (delta 0x801FF050); the header entrypoint
+ * 0x80046800 IS rom 0x1000 (the BSS-clear stub that jr's to the real init at 0x8022e440).
+ *
+ * Engine: ../engine (the single agnostic engine: rt64 + runtime). Cross-platform by
+ * construction — Windows / Linux / macOS / Linux-ARM. Pick a target with the
+ * CMakePresets in this directory (e.g. `cmake --preset linux-arm64`). Keep this file free
+ * of throwaway debug probes; put those behind an env var in the engine, or a local edit.
+ */
+
+#if defined(_WIN32)
+#include <Windows.h>
+#include <commdlg.h>   // OPENFILENAMEA / GetOpenFileNameA
+#endif
+#include <string>
+#include <filesystem>
+#include <cstdlib>
+#include <cstdio>
+#include <atomic>
+
+#define SDL_MAIN_HANDLED
+#include "SDL.h"
+#include "SDL_syswm.h"
+
+#include "recomp.h"
+#include "librecomp/game.hpp"
+#include "librecomp/overlays.hpp"
+#include "librecomp/diag_cap.h"   // console seam ported from snowkidspc (2026-07-31 batch)
+#include "librecomp/sections.h"
+#include "ultramodern/ultramodern.hpp"
+#include "ultramodern/renderer_context.hpp"
+#include "ultramodern/error_handling.hpp"
+
+#ifndef RDPC_CONSOLE_ONLY
+#include "rt64_renderer.hpp"
+#endif
+
+ultramodern::audio_callbacks_t    get_audio_callbacks();
+ultramodern::input::callbacks_t   get_input_callbacks();
+recomp::rsp::callbacks_t          get_rsp_callbacks();
+void waverace_audio_init();
+void waverace_input_init();
+
+// ── Wave Race 64 game identity (recon: ROM header + XXH3, 2026-06-13) ────────
+// XXH3_64bits of Wave Race 64 (USA) baserom.z64
+// SHA1: ec771aedf54ee1b214c25404fb4ec51cfd43191a · internal name "WAVE RACE 64" · NPWE
+static constexpr uint64_t WAVERACE_ROM_HASH        = 0x9655FFD366D955B9ULL;
+static constexpr uint32_t WAVERACE_ENTRYPOINT_VRAM = 0x80046800;
+
+extern "C" void recomp_entrypoint(uint8_t* rdram, recomp_context* ctx);
+
+#include "recomp_overlays.inl"
+
+// console seam ported from snowkidspc (2026-07-31 batch)
+#ifdef RDPC_CAPTURE_CHAIN
+#include "lle_console.h"   // preservation-core console renderer (RDPC_LLE_CONSOLE=1) + blit_tick
+#include "console_input.h" // the evdev input organ -- lets console mode run with no SDL video at all
+#endif
+
+static SDL_Window* sdl_window = nullptr;
+extern std::atomic<double> g_cv64_present_fps;   // present-FPS counter (engine global)
+
+// Cross-platform error dialog: native MessageBox on Windows, SDL elsewhere.
+static void waverace_show_error(const char* title, const char* msg) {
+#if defined(_WIN32)
+    MessageBoxA(nullptr, msg, title, MB_ICONERROR | MB_OK);
+#else
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, msg, nullptr);
+#endif
+}
+
+static ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
+// console seam ported from snowkidspc (2026-07-31 batch)
+#ifdef RDPC_CONSOLE_ONLY
+    // THE CONSOLE CONTRACT (2026-07-25). SDL video was kept alive here for exactly one
+    // reason: SDL's keyboard and gamepad state ride the video backend, so skipping it
+    // starved input (the 07-24 lesson). The cost was DRM master -- which the presentation
+    // organ needs to own the mode and the scanout. preservation_core::input reads
+    // controllers straight from the kernel, so that dependency is gone: when the organ
+    // comes up, SDL video is never initialised and DRM master is free to take.
+    if (preservation_core::input::init()) {
+        // GPU-present tier (repc 4K: GPU upscale via SDL_Renderer) still needs SDL video even
+        // though the evdev organ owns input -- only the organ-scanout path frees DRM master.
+        const char* gp = std::getenv("RDPC_LLE_GPU_PRESENT");
+        if (gp == nullptr || gp[0] != (char)49) {
+            return nullptr;
+        }
+    }
+    fprintf(stderr, "[console] input organ opened no devices -- keeping SDL video so input still works\n");
+#endif
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
+        waverace_show_error("SDL_InitSubSystem Error", SDL_GetError());
+    }
+    return nullptr;
+}
+
+static ultramodern::renderer::WindowHandle
+create_window(ultramodern::gfx_callbacks_t::gfx_data_t /*gfx_data*/)
+{
+// console seam ported from snowkidspc (2026-07-31 batch)
+#ifdef RDPC_CONSOLE_ONLY
+    // Organ up => no SDL video => no window to create. The presentation organ scans out
+    // directly. Window consumers are already null-safe (blit_tick early-returns; the FPS
+    // title is guarded on a non-null window).
+    if (preservation_core::input::active()) {
+        const char* gp = std::getenv("RDPC_LLE_GPU_PRESENT");   // GPU tier keeps its window
+        if (gp == nullptr || gp[0] != (char)49) {
+            return nullptr;
+        }
+    }
+#endif
+    Uint32 win_flags = SDL_WINDOW_RESIZABLE;
+#if !defined(_WIN32)
+    win_flags |= SDL_WINDOW_VULKAN;   // Linux + macOS (MoltenVK) render via Vulkan
+#endif
+// console seam ported from snowkidspc (2026-07-31 batch)
+#ifdef RDPC_CAPTURE_CHAIN
+    if (preservation_core::lleconsole::active()) {
+        // Console mode (RDPC_LLE_CONSOLE=1): no Vulkan window; GL only for the accelerated
+        // upscale presenter (RDPC_LLE_GPU_PRESENT=1). Ported verbatim from starfox64pc (game #6).
+        win_flags = SDL_WINDOW_RESIZABLE;
+        if (const char* fs = std::getenv("RDPC_LLE_FULLSCREEN"); fs && fs[0] == '1')
+            win_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        if (const char* gp = std::getenv("RDPC_LLE_GPU_PRESENT"); gp && gp[0] == '1')
+            win_flags |= SDL_WINDOW_OPENGL;
+    }
+#endif
+    sdl_window = SDL_CreateWindow(
+        "Wave Race 64 PC",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        1920, 1080,
+        win_flags);
+    if (!sdl_window) {
+        waverace_show_error("Window Creation Error", SDL_GetError());
+        std::exit(1);
+    }
+
+#if defined(_WIN32)
+    SDL_SysWMinfo wm_info;
+    SDL_VERSION(&wm_info.version);
+    SDL_GetWindowWMInfo(sdl_window, &wm_info);
+    return ultramodern::renderer::WindowHandle{
+        wm_info.info.win.window,
+        GetCurrentThreadId()
+    };
+#elif defined(__APPLE__)
+    SDL_SysWMinfo wm_info;
+    SDL_VERSION(&wm_info.version);
+    SDL_GetWindowWMInfo(sdl_window, &wm_info);
+    SDL_MetalView mv = SDL_Metal_CreateView(sdl_window);   // CAMetalLayer-backed view for MoltenVK
+    return ultramodern::renderer::WindowHandle{ wm_info.info.cocoa.window, SDL_Metal_GetLayer(mv) };
+#else
+    return sdl_window;   // ultramodern::renderer::WindowHandle == SDL_Window* on Linux/Android
+#endif
+}
+
+static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t /*gfx_data*/) {
+    SDL_Event evt;
+    while (SDL_PollEvent(&evt)) {
+        if (evt.type == SDL_QUIT) {
+            ultramodern::quit();
+        }
+    }
+// console seam ported from snowkidspc (2026-07-31 batch)
+#ifdef RDPC_CAPTURE_CHAIN
+    // Console mode: present the latest VI frame from the preservation core (owner thread).
+    preservation_core::lleconsole::blit_tick(sdl_window);
+#endif
+    {
+        static double last_fps = -1.0;
+        double fps = g_cv64_present_fps.load(std::memory_order_relaxed);
+        if (sdl_window != nullptr && fps != last_fps) {
+            last_fps = fps;
+            char title[80];
+            snprintf(title, sizeof(title), "Wave Race 64 PC  -  %.1f FPS", fps);
+            SDL_SetWindowTitle(sdl_window, title);
+        }
+    }
+}
+
+static void waverace_message_box(const char* msg) {
+    waverace_show_error("Wave Race 64 — Error", msg);
+}
+
+// console seam ported from snowkidspc (2026-07-31 batch)
+static std::unique_ptr<ultramodern::renderer::RendererContext>
+waverace_create_render_context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
+#ifdef RDPC_CAPTURE_CHAIN
+    // Console mode (RDPC_LLE_CONSOLE=1): the preservation-core console replaces RT64 entirely.
+    if (preservation_core::lleconsole::active()) {
+        // Game-agnostic submit seam (organ Move 1): register before the first send_dl.
+        extern void waverace_lle_console_submit();
+        preservation_core::lleconsole::set_submit_callback(&waverace_lle_console_submit);
+        return preservation_core::lleconsole::create_console_context(rdram);
+    }
+#endif
+#ifdef RDPC_CONSOLE_ONLY
+    // PLAN V3 amendment A: no RT64 in this binary. Console mode is the only renderer.
+    waverace_show_error("Renderer", "Console-only build: set RDPC_LLE_CONSOLE=1.");
+    std::exit(1);
+#else
+    return waverace::renderer::create_render_context(rdram, window_handle, developer_mode);
+#endif
+}
+
+#if defined(_WIN32)
+static LONG WINAPI waverace_unhandled_exception(EXCEPTION_POINTERS* ep) {
+    fflush(stderr);
+    DWORD  code = ep->ExceptionRecord->ExceptionCode;
+    void*  addr = ep->ExceptionRecord->ExceptionAddress;
+    ULONG_PTR* info = ep->ExceptionRecord->ExceptionInformation;
+    HMODULE hmod = nullptr;
+    GetModuleHandleExA(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR)addr, &hmod);
+    ULONG_PTR rva = hmod ? (ULONG_PTR)addr - (ULONG_PTR)hmod : 0;
+    char detail[64] = "";
+    if (code == EXCEPTION_ACCESS_VIOLATION && ep->ExceptionRecord->NumberParameters >= 2) {
+        snprintf(detail, sizeof(detail), "\nAccess: %s 0x%llX",
+            info[0] == 0 ? "READ" : "WRITE", (unsigned long long)info[1]);
+    }
+    char msg[1024];
+    snprintf(msg, sizeof(msg),
+        "UNHANDLED EXCEPTION\n\nCode:        0x%08X\nAddress:     0x%p\n"
+        "RVA (map):   0x%08llX%s\n\nThis offset matches a line in waveracepc.map.\n"
+        "Compare Address against the exe base BEFORE map lookups.\n\nThread: %u",
+        code, addr, (unsigned long long)rva, detail, GetCurrentThreadId());
+    fprintf(stderr, "%s\n", msg);
+    fflush(stderr);
+    __try {
+        HMODULE exe = GetModuleHandleA(nullptr);
+        CONTEXT* ctx = ep->ContextRecord;
+        if (exe != nullptr && ctx != nullptr) {
+            const uintptr_t* sp = (const uintptr_t*)ctx->Rsp;
+            fprintf(stderr, "[crashstack] Rsp=0x%p — call sites in waveracepc.exe (base=0x%p), nearest first:\n",
+                    (void*)ctx->Rsp, (void*)exe);
+            int found = 0;
+            for (int i = 0; i < 128 && found < 16; i++) {
+                uintptr_t ret = sp[i];
+                HMODULE m = nullptr;
+                if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                       GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                       (LPCSTR)ret, &m) && m == exe) {
+                    fprintf(stderr, "[crashstack]   stack+0x%03X  RVA=0x%08llX\n",
+                            (unsigned)(i * 8), (unsigned long long)(ret - (uintptr_t)exe));
+                    found++;
+                }
+            }
+            fprintf(stderr, "[crashstack] (%d call sites found)\n", found);
+            fflush(stderr);
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        fprintf(stderr, "[crashstack] (stack scan faulted — Rsp corrupt)\n"); fflush(stderr);
+    }
+    MessageBoxA(nullptr, msg, "Wave Race 64 — Crash", MB_ICONERROR | MB_OK);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif // _WIN32 (crash handler)
+
+#if defined(_WIN32)
+// [watchdog] THROWAWAY spin-finder (carried over from the previous Windows-only file; Windows
+// only -- Toolhelp32): after boot, suspend every thread and dump its RIP + the stack
+// return-addresses that land in waveracepc.exe. The RIP RVA maps directly to the spinning
+// function via waveracepc.map; the stack RVAs give the call chain. Three passes confirm a
+// stable spin (same RIP) vs progress. (Same probe that cracked Nightmare Creatures.)
+#include <tlhelp32.h>
+static void wr_watchdog_dump(int pass) {
+    HMODULE exe = GetModuleHandleA(nullptr);
+    DWORD myproc = GetCurrentProcessId(), mytid = GetCurrentThreadId();
+    fprintf(stderr, "[watchdog] ==== pass %d (exe base=0x%p) ====\n", pass, (void*)exe);
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) { fprintf(stderr, "[watchdog] snapshot failed\n"); fflush(stderr); return; }
+    THREADENTRY32 te; te.dwSize = sizeof(te);
+    if (Thread32First(snap, &te)) {
+        do {
+            if (te.th32OwnerProcessID != myproc || te.th32ThreadID == mytid) continue;
+            HANDLE th = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, te.th32ThreadID);
+            if (!th) continue;
+            SuspendThread(th);
+            CONTEXT ctx; ctx.ContextFlags = CONTEXT_FULL;
+            if (GetThreadContext(th, &ctx)) {
+                HMODULE m = nullptr;
+                bool ripInExe = GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)ctx.Rip, &m) && m == exe;
+                if (ripInExe) {
+                    fprintf(stderr, "[watchdog] tid=%-5u RIP RVA=0x%08llX  <-- in exe (spin candidate)\n",
+                            te.th32ThreadID, (unsigned long long)(ctx.Rip - (uintptr_t)exe));
+                    __try {
+                        const uintptr_t* sp = (const uintptr_t*)ctx.Rsp;
+                        int found = 0;
+                        for (int i = 0; i < 400 && found < 24; i++) {
+                            uintptr_t ret = sp[i]; HMODULE mm = nullptr;
+                            if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)ret, &mm) && mm == exe) {
+                                fprintf(stderr, "[watchdog]   tid=%-5u sp+0x%04X RVA=0x%08llX\n",
+                                        te.th32ThreadID, (unsigned)(i * 8), (unsigned long long)(ret - (uintptr_t)exe));
+                                found++;
+                            }
+                        }
+                    } __except (EXCEPTION_EXECUTE_HANDLER) {}
+                }
+            }
+            ResumeThread(th); CloseHandle(th);
+        } while (Thread32Next(snap, &te));
+    }
+    CloseHandle(snap);
+    fprintf(stderr, "[watchdog] ==== pass %d done ====\n", pass); fflush(stderr);
+}
+static DWORD WINAPI wr_watchdog(LPVOID) { Sleep(8000); wr_watchdog_dump(1); Sleep(4000); wr_watchdog_dump(2); Sleep(4000); wr_watchdog_dump(3); return 0; }
+#endif // _WIN32 (watchdog)
+
+static void waverace_vi_callback() {}
+static void waverace_gfx_init_callback() {}
+
+static std::string waverace_get_thread_name(const OSThread* t) {
+    return "pw_" + std::to_string(t->id);   // prefix preserved from the previous waveracepc main.cpp
+}
+
+static void prompt_for_rom(const char* rom_hint) {
+    std::filesystem::path rom_path;
+
+#if defined(_WIN32)
+    if (rom_hint && *rom_hint) {
+        rom_path = rom_hint;
+    } else {
+        OPENFILENAMEA ofn   = {};
+        char          path[MAX_PATH] = {};
+        ofn.lStructSize = sizeof(ofn);
+        ofn.lpstrFilter = "N64 ROM Files\0*.z64;*.n64;*.v64\0All Files\0*.*\0";
+        ofn.lpstrFile   = path;
+        ofn.nMaxFile    = MAX_PATH;
+        ofn.lpstrTitle  = "Select Wave Race 64 ROM (USA)";
+        ofn.Flags       = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+        if (!GetOpenFileNameA(&ofn)) {
+            waverace_show_error("ROM Required",
+                "A Wave Race 64 ROM is required.\n"
+                "Please supply your own legally obtained copy.");
+            std::exit(0);
+        }
+        rom_path = path;
+    }
+#else
+    // No native file dialog wired off Windows: take the ROM path from argv[1] or the
+    // WAVERACE_ROM env var (e.g. an SBC/console that already has the ROM at a known path).
+    if (!rom_hint || !*rom_hint) rom_hint = std::getenv("WAVERACE_ROM");
+    if (!rom_hint || !*rom_hint) {
+        waverace_show_error("ROM Required",
+            "Pass the Wave Race 64 ROM path as the first argument,\n"
+            "or set the WAVERACE_ROM environment variable.");
+        std::exit(0);
+    }
+    rom_path = rom_hint;
+#endif
+
+    std::u8string out_id = u8"waverace_us";
+    auto err = recomp::select_rom(rom_path, out_id);
+    switch (err) {
+    case recomp::RomValidationError::Good:
+        return;
+    case recomp::RomValidationError::IncorrectRom:
+    case recomp::RomValidationError::IncorrectVersion:
+        waverace_show_error("Wrong ROM",
+            "The selected ROM does not match Wave Race 64 (USA).\n"
+            "Expected SHA1: ec771aedf54ee1b214c25404fb4ec51cfd43191a");
+        std::exit(1);
+    case recomp::RomValidationError::NotARom:
+        waverace_show_error("Not an N64 ROM", "The selected file does not appear to be an N64 ROM.");
+        std::exit(1);
+    default:
+        waverace_show_error("ROM Error", "Failed to read the selected ROM file.");
+        std::exit(1);
+    }
+}
+
+static int waverace_app_main(int argc, char** argv)
+{
+    const char* rom_hint = (argc > 1) ? argv[1] : nullptr;
+
+#if defined(_WIN32)
+    SetUnhandledExceptionFilter(waverace_unhandled_exception);
+#endif
+    SDL_SetMainReady();
+
+#if defined(_WIN32)
+    const char* appdata = std::getenv("APPDATA");
+    if (!appdata) appdata = ".";
+    std::filesystem::path config_path = std::filesystem::path(appdata) / "waveracepc";
+#else
+    const char* xdg  = std::getenv("XDG_CONFIG_HOME");
+    const char* home = std::getenv("HOME");
+    std::filesystem::path config_base =
+        (xdg && *xdg) ? std::filesystem::path(xdg)
+                      : (home ? std::filesystem::path(home) / ".config"
+                              : std::filesystem::path("."));
+    std::filesystem::path config_path = config_base / "waveracepc";
+#endif
+    std::filesystem::create_directories(config_path);
+
+    {
+        std::filesystem::path log_path = config_path / "waveracepc_diag.log";
+        FILE* f = nullptr;
+#if defined(_WIN32)
+        freopen_s(&f, log_path.string().c_str(), "w", stderr);
+#else
+        f = freopen(log_path.string().c_str(), "w", stderr);
+#endif
+        if (f) { setvbuf(f, nullptr, _IONBF, 0); fprintf(stderr, "[waveracepc] diagnostic log started\n"); }
+        recomp::diag_log_cap(log_path.string());   // console seam ported from snowkidspc (2026-07-31 batch)
+        std::filesystem::path stdout_path = config_path / "waveracepc_stdout.log";
+        FILE* fout = nullptr;
+#if defined(_WIN32)
+        freopen_s(&fout, stdout_path.string().c_str(), "w", stdout);
+#else
+        fout = freopen(stdout_path.string().c_str(), "w", stdout);
+#endif
+        if (fout) { setvbuf(fout, nullptr, _IONBF, 0); fprintf(stdout, "[waveracepc] stdout log started\n"); }
+    }
+
+    recomp::register_config_path(config_path);
+
+    // (Wave-1 purge: removed the baked-in _putenv_s("RECOMP_OVLDISC","1") — a porting-time
+    // diagnostic force-enabled on every run. Set the env externally when doing overlay work.)
+
+    recomp::GameEntry entry{};
+    entry.rom_hash           = WAVERACE_ROM_HASH;
+    entry.internal_name      = "WAVE RACE 64";
+    entry.game_id            = u8"waverace_us";
+    entry.mod_game_id        = "";
+    entry.save_type          = recomp::SaveType::Eep4k;   // Wave Race 64 = EEPROM (verify size if save fails)
+    entry.is_enabled         = true;
+    entry.entrypoint_address = WAVERACE_ENTRYPOINT_VRAM;
+    entry.entrypoint         = recomp_entrypoint;
+    recomp::register_game(entry);
+
+    recomp::overlays::register_overlays(
+        recomp::overlays::overlay_section_table_data_t{
+            .code_sections      = section_table,
+            .num_code_sections  = sizeof(section_table) / sizeof(section_table[0]),
+            .total_num_sections = num_sections,
+        },
+        recomp::overlays::overlays_by_index_t{
+            .table = overlay_sections_by_index,
+            .len   = sizeof(overlay_sections_by_index) / sizeof(overlay_sections_by_index[0]),
+        });
+
+    recomp::check_all_stored_roms();
+    std::u8string game_id = u8"waverace_us";
+    if (!recomp::is_rom_valid(game_id)) {
+        prompt_for_rom(rom_hint);
+        recomp::check_all_stored_roms();
+        if (!recomp::is_rom_valid(game_id)) {
+            waverace_show_error("Error", "ROM validation failed after selection.");
+            return 1;
+        }
+    }
+
+    SDL_Init(SDL_INIT_AUDIO);
+    waverace_audio_init();
+    waverace_input_init();
+
+    recomp::start_game(game_id);
+#if defined(_WIN32)
+    CloseHandle(CreateThread(nullptr, 0, wr_watchdog, nullptr, 0, nullptr));  // [watchdog] THROWAWAY
+#endif
+
+    recomp::Configuration cfg{};
+    cfg.project_version      = { 0, 1, 0, "" };
+    cfg.rsp_callbacks        = get_rsp_callbacks();
+    cfg.renderer_callbacks   = { .create_render_context = waverace_create_render_context };   // console seam ported from snowkidspc (2026-07-31 batch)
+    cfg.audio_callbacks      = get_audio_callbacks();
+    cfg.input_callbacks      = get_input_callbacks();
+    cfg.gfx_callbacks        = {
+        .create_gfx    = create_gfx,
+        .create_window = create_window,
+        .update_gfx    = update_gfx,
+    };
+    cfg.events_callbacks     = {
+        .vi_callback       = waverace_vi_callback,
+        .gfx_init_callback = waverace_gfx_init_callback,
+    };
+    cfg.error_handling_callbacks = { .message_box = waverace_message_box };
+    cfg.threads_callbacks    = { .get_game_thread_name = waverace_get_thread_name };
+    cfg.message_queue_control = {
+        .requeue_timer = true,
+        .requeue_sp    = true,
+        .requeue_si    = true,
+        .requeue_ai    = false,
+        .requeue_vi    = false,
+        .requeue_pi    = false,
+        .requeue_dp    = true,
+    };
+
+    recomp::start(cfg);
+
+    SDL_Quit();
+    return 0;
+}
+
+// ── Entry point: GUI WinMain on Windows, standard main() on Linux/macOS ────────
+#if defined(_WIN32)
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+    return waverace_app_main(__argc, __argv);   // CRT-provided argc/argv
+}
+#else
+int main(int argc, char** argv) {
+    return waverace_app_main(argc, argv);
+}
+#endif

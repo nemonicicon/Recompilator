@@ -1,0 +1,55 @@
+{
+  "game": "toystory2buzzlight",
+  "rom": {
+    "sha1": "982ad2e1e44c6662c88a77367bc5df91c51531bf",
+    "xxh3_64": "0xFD53C5EC8CE2530A",
+    "entrypoint": "0x80006000"
+  },
+  "sweep": {
+    "title": "Toy Story 2",
+    "release": "1999-11-30",
+    "sweep": "—"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "toystory2buzzlight.toml",
+    "toystory2buzzlight.yaml",
+    "toystory2buzzlight_overlays.txt",
+    "toystory2buzzlight_pinned.ld",
+    "toystory2buzzlight_stubs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

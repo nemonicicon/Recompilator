@@ -1,0 +1,27 @@
+[input]
+entrypoint                = 0x8004B400
+elf_path                  = "../extremeg/build/extremeg.elf"
+rom_file_path             = "../extremeg/baserom.z64"
+output_func_path          = "../extremegpc/RecompiledFuncs"
+relocatable_sections_path = "extremeg_overlays.txt"
+
+uses_mips3_float_mode = true
+
+function_sizes = [
+  { name = "func_8004B400", size = 100 },
+  { name = "func_8004B464", size = 48 },
+  { name = "func_8004B494", size = 4 },
+  { name = "func_8004B498", size = 428 },
+  { name = "func_80073A1C", size = 16 },
+  { name = "func_800E5F28", size = 32 },
+  { name = "func_8012AFE4", size = 32 },
+]
+
+exact_size_funcs = [
+
+]
+
+[patches]
+stubs = [
+
+]

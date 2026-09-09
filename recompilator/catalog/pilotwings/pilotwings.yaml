@@ -1,0 +1,68 @@
+# Pilotwings 64 (USA) — splat-less Recompilator front-end config. GAME #4.
+# First target outside the CV64 + SM64 lineages (Paradigm/Nintendo, no decomp).
+# Instantiates the SM64 (game #3) non-sibling pipeline (build_sm64.sh + match_libultra
+# version-invariant detectors + pinned-ld + verify_rom_match byte-exact gate).
+#
+# RECON (empirical, 2026-06-13 — N64PC/pw_recon.py + pw_recon2.py):
+#   8MB, entry 0x80200050, name "Pilot Wings64", cart NPWE, mips3 float (ldc1=939/sdc1=1279).
+#   boot @ rom 0x1000 (vram 0x80200000): BSS-clear loop (zeroes 0x80250e80 for 0x79a80),
+#     then jr 0x8022e440 (real init), sp=0x802c3c90.
+#   CODE: contiguous @ vram 0x80200000, rom 0x1000..~0xd9000 (delta 0x801FF000). VERIFIED
+#     by a direct address-load ref: main func @ rom 0x44400 loads 0x802CA638 = rom 0xCB638
+#     (linear) = real code/data, NOT the windowed-solve's spurious 0x802c9000 (that delta was
+#     a histogram artifact: region-2 jals mostly target main/libultra). data island rom
+#     0x8000..0xf000 (disassemble_all handles it). rom ~0x51000..0xd1000 MAY be a relocated
+#     overlay at a non-linear runtime vram — byte-exact is insensitive to that; CONFIRM the
+#     true vram via the recompiler's unresolved-jal census before trusting those symbols, then
+#     split it into its own segment (the SM64 lib@0x80378800 method).
+#   assets/data: rom ~0xda000..0x800000.
+# ONE code segment for the byte-exact milestone; split overlays later (see above).
+name: Pilotwings 64 (USA)
+sha1: ec771aedf54ee1b214c25404fb4ec51cfd43191a
+options:
+  basename: pilotwings
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/pilotwings.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: true
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80200050   # rom 0x1000 -> vram 0x80200050 (delta 0x801FF050): the header entry
+                       # 0x80200050 IS rom 0x1000 (the BSS-clear stub). Verified by the printf
+                       # jtbl @ rom 0x4d51c which code references as 0x8024c56c (= rom+0x801FF050).
+    subsegments:
+      - [0x1000, asm, main]   # resident image (code + data + jtbls), rom 0x1000..0x51E30,
+                              # ends exactly at BSS (vram 0x80250e80). ONE asm subsegment keeps
+                              # byte-order exact; data-as-code handled via pilotwings_stubs.txt.
+  - name: overlay
+    type: code
+    start: 0x51E30
+    vram: 0x802CA900   # the OVERLAY segment: rom 0x51E30 -> vram 0x802CA900 (delta 0x80278AD0),
+                       # DMA'd linearly in 0x1000 chunks right above BSS (diag-log verified). The
+                       # resident init jals straight into it (e.g. 0x8030FE20 = rom 0x97350).
+    subsegments:
+      - [0x51E30, asm, overlay]
+  - name: assets
+    type: bin
+    start: 0xda000
+  - [0x800000]

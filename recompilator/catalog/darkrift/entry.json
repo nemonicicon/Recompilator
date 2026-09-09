@@ -1,0 +1,56 @@
+{
+  "game": "darkrift",
+  "rom": {
+    "sha1": "3254442626ca2f2ac74400dc1c6a306f5d1b6ceb",
+    "xxh3_64": "0xE62F5563DF5F18A0",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "Dark Rift",
+    "release": "1997-07-10",
+    "sweep": "PASS",
+    "reached": "title"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "darkrift.toml",
+    "darkrift.yaml",
+    "darkrift_overlays.txt",
+    "darkrift_pinned.ld",
+    "darkrift_stubs.txt",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

@@ -1,0 +1,53 @@
+{
+  "game": "test3d_40winks",
+  "rom": {
+    "sha1": "c9522561b622d2eb22e57aadbb43da6cf71d458d",
+    "xxh3_64": "0x567A9769B21418EB",
+    "entrypoint": "0x80210000"
+  },
+  "sweep": {
+    "title": "3D Model RGB Test Program (40 Winks engine) (USA)"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "test3d_40winks.toml",
+    "test3d_40winks.yaml",
+    "test3d_40winks_overlays.txt",
+    "test3d_40winks_pinned.ld",
+    "test3d_40winks_stubs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

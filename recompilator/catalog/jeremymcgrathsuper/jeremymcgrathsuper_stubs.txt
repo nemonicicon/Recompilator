@@ -1,0 +1,2 @@
+# auto-stubbed data-as-code funcs (recomp_autostub.py)
+func_803001B8

@@ -1,0 +1,121 @@
+name: Tony Hawk's Pro Skater (USA)
+sha1: fc1b4dec85e6874fa7321edc24f5a1e78600d9d0
+options:
+  basename: thps
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/thps.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x138C, asm, main_8000078C]
+      - [0x1470, asm, main_80000870]
+      - [0x1E6C, asm, main_8000126C]
+      - [0x32C4, asm, main_800026C4]
+      - [0x3690, asm, main_80002A90]
+      - [0x53F4, asm, main_800047F4]
+      - [0x5AD0, asm, main_80004ED0]
+      - [0x6440, asm, main_80005840]
+      - [0xC340, asm, main_8000B740]
+      - [0xE1B4, asm, main_8000D5B4]
+      - [0xE3B8, asm, main_8000D7B8]
+      - [0xE8D8, asm, main_8000DCD8]
+      - [0xF510, asm, main_8000E910]
+      - [0xF680, asm, main_8000EA80]
+      - [0xF834, asm, main_8000EC34]
+      - [0x10274, asm, main_8000F674]
+      - [0x102F0, asm, main_8000F6F0]
+      - [0x10690, asm, main_8000FA90]
+      - [0x12BB8, bin, main_80011FB8]
+      - [0x148B0, bin, main_80013CB0]
+      - [0x1520C, bin, main_8001460C]
+      - [0x17A88, bin, main_80016E88]
+      - [0x1AB00, asm, main_80019F00]
+      - [0x1AB30, bin, main_80019F30]
+      - [0x29128, asm, main_80028528]
+      - [0x291B0, bin, main_800285B0]
+      - [0x2CBCC, asm, main_8002BFCC]
+      - [0x2CBD0, bin, main_8002BFD0]
+      - [0x2CBEC, asm, main_8002BFEC]
+      - [0x2CC48, bin, main_8002C048]
+      - [0x345E4, asm, main_800339E4]
+      - [0x346A8, bin, main_80033AA8]
+      - [0x44404, asm, main_80043804]
+      - [0x44414, bin, main_80043814]
+      - [0x4A8E8, asm, main_80049CE8]
+      - [0x4A924, bin, main_80049D24]
+      - [0x5DEB4, asm, main_8005D2B4]
+      - [0x5DEC0, bin, main_8005D2C0]
+      - [0x6049C, asm, main_8005F89C]
+      - [0x604B4, bin, main_8005F8B4]
+      - [0x6085C, asm, main_8005FC5C]
+      - [0x60868, bin, main_8005FC68]
+      - [0x67BB0, asm, main_80066FB0]
+      - [0x67BC0, bin, main_80066FC0]
+      - [0x6B2B0, asm, main_8006A6B0]
+      - [0x6B320, bin, main_8006A720]
+      - [0x8A428, asm, main_80089828]
+      - [0x8A478, bin, main_80089878]
+      - [0x94078, asm, main_80093478]
+      - [0x940EC, bin, main_800934EC]
+      - [0x9D9CC, asm, main_8009CDCC]
+      - [0x9DA10, bin, main_8009CE10]
+      - [0xAAF5C, asm, main_800AA35C]
+      - [0xAAF88, bin, main_800AA388]
+      - [0xAB964, asm, main_800AAD64]
+      - [0xAB968, bin, main_800AAD68]
+      - [0xBDD88, asm, main_800BD188]
+      - [0xBDD98, bin, main_800BD198]
+      - [0xCF09C, asm, main_800CE49C]
+      - [0xCF0A4, bin, main_800CE4A4]
+      - [0xCFC58, asm, main_800CF058]
+      - [0xCFC64, bin, main_800CF064]
+      - [0xD2554, asm, main_800D1954]
+      - [0xD258C, bin, main_800D198C]
+      - [0xD9A8C, asm, main_800D8E8C]
+      - [0xD9AC8, bin, main_800D8EC8]
+      - [0xDDDDC, asm, main_800DD1DC]
+      - [0xDDDEC, bin, main_800DD1EC]
+      - [0xDFF1C, asm, main_800DF31C]
+      - [0xDFF30, bin, main_800DF330]
+      - [0xE0348, asm, main_800DF748]
+      - [0xE03D8, bin, main_800DF7D8]
+      - [0xE4AFC, asm, main_800E3EFC]
+      - [0xE4B0C, bin, main_800E3F0C]
+      - [0xE535C, asm, main_800E475C]
+      - [0xE53EC, bin, main_800E47EC]
+      - [0xE756C, asm, main_800E696C]
+      - [0xE7574, bin, main_800E6974]
+      - [0xF4DE8, bin, main_800F41E8]
+      - [0xF9F74, asm, main_800F9374]
+      - [0xF9F9C, bin, main_800F939C]
+      - [0xFA934, bin, main_800F9D34]
+      - [0xFED08, asm, main_800FE108]
+      - [0xFED18, bin, main_800FE118]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

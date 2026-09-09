@@ -1,0 +1,88 @@
+[input]
+entrypoint                = 0x80000400
+elf_path                  = "../fifa/build/fifa.elf"
+rom_file_path             = "../fifa/baserom.z64"
+output_func_path          = "../fifapc/RecompiledFuncs"
+relocatable_sections_path = "fifa_overlays.txt"
+
+uses_mips3_float_mode = true
+
+function_sizes = [
+  { name = "func_80000400", size = 80 },
+  { name = "func_80000450", size = 120 },
+  { name = "func_800004C8", size = 248 },
+  { name = "func_800005C0", size = 60 },
+  { name = "func_800005FC", size = 68 },
+  { name = "func_80000640", size = 164 },
+  { name = "func_800006E4", size = 108 },
+  { name = "func_80000750", size = 1440 },
+  { name = "osInvalDCache", size = 176 },
+  { name = "osInvalICache", size = 128 },
+  { name = "func_80000E20", size = 224 },
+  { name = "func_80000F00", size = 16 },
+  { name = "osInitialize", size = 672 },
+  { name = "osVirtualToPhysical", size = 128 },
+  { name = "func_80001230", size = 16 },
+  { name = "func_80001240", size = 16 },
+  { name = "__osSetFpcCsr", size = 16 },
+  { name = "func_80001260", size = 80 },
+  { name = "func_800012B0", size = 80 },
+  { name = "func_80001300", size = 16 },
+  { name = "func_80001394", size = 1184 },
+  { name = "func_80001834", size = 232 },
+  { name = "func_8000191C", size = 256 },
+  { name = "func_80001A1C", size = 72 },
+  { name = "func_80001A64", size = 396 },
+  { name = "osWritebackDCache", size = 128 },
+  { name = "func_80001C80", size = 96 },
+  { name = "func_80001CE0", size = 96 },
+  { name = "func_80001D40", size = 44 },
+  { name = "__ull_rem", size = 60 },
+  { name = "__ull_div", size = 60 },
+  { name = "func_80001DE4", size = 44 },
+  { name = "func_80001E10", size = 60 },
+  { name = "__ll_div", size = 92 },
+  { name = "__ll_mul", size = 48 },
+  { name = "func_80001ED8", size = 96 },
+  { name = "func_80001F38", size = 156 },
+  { name = "func_80001FD4", size = 44 },
+  { name = "func_80002000", size = 160 },
+  { name = "func_800020A0", size = 80 },
+  { name = "func_800020F0", size = 1764 },
+  { name = "func_800027D4", size = 232 },
+  { name = "func_800028BC", size = 244 },
+  { name = "func_800029B0", size = 192 },
+  { name = "func_80002A70", size = 48 },
+  { name = "func_80002AA0", size = 64 },
+  { name = "osSetEventMesg", size = 112 },
+  { name = "osSetIntMask", size = 160 },
+  { name = "osDestroyThread", size = 256 },
+  { name = "__osDisableInt", size = 32 },
+  { name = "__osRestoreInt", size = 32 },
+  { name = "func_80002D30", size = 240 },
+  { name = "func_80002E20", size = 224 },
+  { name = "osCreatePiManager", size = 400 },
+  { name = "osCreateMesgQueue", size = 48 },
+  { name = "func_800030C0", size = 80 },
+  { name = "func_80003110", size = 68 },
+  { name = "func_80003154", size = 44 },
+  { name = "osGetThreadPri", size = 32 },
+  { name = "osSetThreadPri", size = 224 },
+  { name = "osCreateThread", size = 336 },
+  { name = "func_800033D0", size = 944 },
+  { name = "osStartThread", size = 336 },
+  { name = "osSendMesg", size = 336 },
+  { name = "osRecvMesg", size = 320 },
+  { name = "func_80003B60", size = 96 },
+  { name = "func_80003BC0", size = 80 },
+  { name = "func_80003C10", size = 80 },
+]
+
+exact_size_funcs = [
+
+]
+
+[patches]
+stubs = [
+
+]

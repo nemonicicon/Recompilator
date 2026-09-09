@@ -1,0 +1,6 @@
+func_800A2B78
+func_800ABB68
+func_800ADC80
+func_800E4674
+func_800E530C
+func_800FEA6C

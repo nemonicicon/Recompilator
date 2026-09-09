@@ -1,0 +1,56 @@
+{
+  "game": "wwfwarzone",
+  "rom": {
+    "sha1": "8700f89cd7cfa873452117f6b2a648d32796111c",
+    "xxh3_64": "0xFDA3D127FF8B5D3D",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "WWF War Zone",
+    "release": "1998-08-11",
+    "sweep": "PASS",
+    "reached": "title"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld",
+    "wwfwarzone.toml",
+    "wwfwarzone.yaml",
+    "wwfwarzone_overlays.txt",
+    "wwfwarzone_pinned.ld",
+    "wwfwarzone_stubs.txt"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

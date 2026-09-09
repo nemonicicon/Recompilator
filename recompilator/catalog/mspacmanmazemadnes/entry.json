@@ -1,0 +1,55 @@
+{
+  "game": "mspacmanmazemadnes",
+  "rom": {
+    "sha1": "99028c738b5ac5ff99d73698b50d14f5e58ddea7",
+    "xxh3_64": "0xB292A6A39B213527",
+    "entrypoint": "0x80200400"
+  },
+  "sweep": {
+    "title": "Ms. Pac-Man Maze Madness",
+    "release": "2000-11-12",
+    "sweep": "—"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "mspacmanmazemadnes.toml",
+    "mspacmanmazemadnes.yaml",
+    "mspacmanmazemadnes_overlays.txt",
+    "mspacmanmazemadnes_pinned.ld",
+    "mspacmanmazemadnes_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

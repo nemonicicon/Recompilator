@@ -1,0 +1,47 @@
+name: "Armorines Project S. (armorines)"
+sha1: d9f55acf77a54eeb7f62577aa5711769ebeadde3
+options:
+  basename: armorines
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/armorines.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: true
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  # ACCLAIM WINDOW MODEL (acclaim_setup.py, decoded from this cart's own boot stub):
+  # stub at KSEG0 0x80000400 maps virtual 0x200000 -> phys 0 and jalr's to
+  # 0x00292E00; the body is LINKED AT THE WINDOW (virtual = 0x200000 + phys).
+  - name: boot
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, boot_80000400]
+  - name: main
+    type: code
+    start: 0x15F0
+    vram: 0x002009F0
+    subsegments:
+      - [0x15F0, asm, main_002009F0]
+      - [0xFE000, bin, main_002FD400]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

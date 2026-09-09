@@ -1,0 +1,51 @@
+{
+  "game": "sfrush",
+  "rom": {
+    "sha1": "cc62539cb30b180c3c7e0aa927786ed061d8d9ab",
+    "xxh3_64": "0x69B0BE5C5EE77D07",
+    "entrypoint": "0x80000400"
+  },
+  "sweep": {
+    "title": "San Francisco Rush",
+    "release": "1997-09",
+    "sweep": "PASS",
+    "reached": "gameplay"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "sfrush.toml",
+    "sfrush.yaml",
+    "sfrush_overlays.txt",
+    "sfrush_pinned.ld",
+    "sfrush_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

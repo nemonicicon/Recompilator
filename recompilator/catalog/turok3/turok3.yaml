@@ -1,0 +1,48 @@
+name: Turok 3 Shadow of Oblivion (USA)
+sha1: a2e0a28dc0d3a48c7c02cb9e4c4b38fe04b2d436
+options:
+  basename: turok3
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/turok3.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: true
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  # ACCLAIM LONDON MEMORY MODEL (turok2 finding, same date — stub disassembly identical):
+  # boot stub at KSEG0 0x80000400 maps virtual 0x00200000 -> phys 0x0 (2MB, idx 31) and
+  # jalr's to virtual 0x0020AA50. The body is LINKED AT THE WINDOW (virtual = 0x200000 +
+  # phys). Boot and body get their true execution bases as separate segments.
+  - name: boot
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, boot_80000400]
+  - name: main
+    type: code
+    start: 0x1100
+    vram: 0x00200500
+    subsegments:
+      - [0x1100, asm, main_00200500]
+      - [0xF2000, bin, main_002F1400]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x2000000]

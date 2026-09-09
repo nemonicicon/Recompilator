@@ -1,0 +1,58 @@
+# RSPRecomp config for F3DEX.NoN 1.22 — reference specimen: Star Fox 64 (USA) gfx ucode.
+# CATALOG RUNG (2026-07-24, the starfox drive): fourth 1.x-line member through the SK1 recipe.
+# Census row = one build, both US revisions (key 6f8d389e4f66 — COLLIDES with NoN-1.21 (18 games)
+# and NoN-1.23 (Yoshi's) builds BY LAW ⇒ registry verify window mandatory at registration).
+#
+# Located STATICALLY from the ROM (no run, no decomp): version string @ROM 0xC0800 ⇒ data base
+# 0xC0550 (1.x law: string@data+0x2B0); text found by family boot-preamble alignment @ROM 0x2010
+# (16/16 opcode match vs the 1.23 head; first word differs by 2 bits — prefix search misses it).
+# Layout decoded from the ucode's OWN data header (pairs at data+0x00..0x27):
+#   main text 0xF80 -> IMEM 0x080 · overlay 0 = file 0xF80 (0x88) -> IMEM 0x000 (family law)
+#   swap slot @ IMEM 0x740 (1.23: 0x738, SK1: 0x748) — overlays 0x220/0x198/0x70 at file
+#   0x1008/0x1228/0x13C0; resident-under-slot = file 0x740-0x80 = 0x6C0.
+# Sibling scale: 3721/0x1800 text bytes differ vs 1.23 — a true distinct build.
+#
+# Targets = the ucode's own GBI dispatch table (40 u16 @data+0xB6, 33 unique), extracted
+# statically. 1.x FAMILY LAW (aerogauge lesson): boot/attract never fires the deep computed
+# labels — gameplay vectors are mandatory for full coverage; unhandled targets NAME THEMSELVES
+# in the bail log ⇒ add + regen iteratively.
+text_offset = 0x2010
+text_size = 0x1000
+text_address = 0x04001000
+text_load_offset = 0x80
+rom_file_path = "../starfox64/baserom.z64"
+output_file_path = "RecompiledFuncs/f3dexnon122.cpp"
+output_function_name = "f3dexnon122"
+
+extra_indirect_branch_targets = [
+    0x1058, 0x109C, 0x11AC, 0x11BC, 0x11E4, 0x1204, 0x1238, 0x1250,
+    0x1274, 0x127C, 0x12B8, 0x12D8, 0x12F8, 0x1310, 0x1320, 0x1334,
+    0x1348, 0x1350, 0x1358, 0x1390, 0x13A8, 0x1574, 0x16F0, 0x1700,
+    0x1748, 0x175C, 0x1778, 0x1794, 0x1798, 0x17F0, 0x1804, 0x1940,
+    0x1F8C,
+    # named by the first Pi run's bail log (2026-07-24 11:1x — the 1.x iteration law):
+    0x11C8, 0x174C, 0x1960,
+]
+
+# Overlay slot @ IMEM 0x000 (overlay 0 — loaded over the boot stub region).
+[[overlay_slots]]
+text_address = 0x04001000
+  [[overlay_slots.overlays]]
+  offset = 0xF80
+  size = 0x88
+
+# Overlay slot @ IMEM 0x740 (overlays swap here; index 0 = resident-under-slot).
+[[overlay_slots]]
+text_address = 0x04001740
+  [[overlay_slots.overlays]]
+  offset = 0x6C0
+  size = 0x220
+  [[overlay_slots.overlays]]
+  offset = 0x1008
+  size = 0x220
+  [[overlay_slots.overlays]]
+  offset = 0x1228
+  size = 0x198
+  [[overlay_slots.overlays]]
+  offset = 0x13C0
+  size = 0x70

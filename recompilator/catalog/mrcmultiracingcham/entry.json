@@ -1,0 +1,56 @@
+{
+  "game": "mrcmultiracingcham",
+  "rom": {
+    "sha1": "8bea68833d63b2f17daad4477a572c274a9468be",
+    "xxh3_64": "0x5BC294BBE117AEC5",
+    "entrypoint": "0x80057000"
+  },
+  "sweep": {
+    "title": "Multi Racing Championship",
+    "release": "1997-09",
+    "sweep": "PASS",
+    "reached": "title"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "mrcmultiracingcham.toml",
+    "mrcmultiracingcham.yaml",
+    "mrcmultiracingcham_overlays.txt",
+    "mrcmultiracingcham_pinned.ld",
+    "mrcmultiracingcham_stubs.txt",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

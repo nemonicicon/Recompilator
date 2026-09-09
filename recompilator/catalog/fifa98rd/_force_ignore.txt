@@ -1,0 +1,6 @@
+func_80007C1C
+func_80008504
+func_8000A110
+func_80021058
+func_8009FEF4
+func_800BFD2C

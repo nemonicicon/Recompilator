@@ -1,0 +1,2 @@
+# sm64 bring-up stubs (one name per line). EMPTY: the SM64 recompile needed ZERO stubs.
+# Only stubs WITH a diagnosis may enter this file (the lod_stubs.txt discipline).

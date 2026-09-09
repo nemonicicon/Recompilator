@@ -1,0 +1,5 @@
+# Pilotwings stubs — data-as-code functions (splat typed a jal target / table as FUNC).
+# Stubbing a data table to a no-op = the CV64 "DATA mislabeled as FUNC -> keep stubbed" pattern.
+func_8024B7D4
+func_80250400
+func_80250C00

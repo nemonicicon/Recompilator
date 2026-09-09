@@ -1,0 +1,1011 @@
+#include <optional>
+
+#include "fmt/format.h"
+// #include "fmt/ostream.h"
+
+#include "recompiler/context.h"
+#include "recompiler/diag_sink.h"
+#include "elfio/elfio.hpp"
+
+#include "mdebug.h"
+
+bool read_symbols(N64Recomp::Context& context, const ELFIO::elfio& elf_file, ELFIO::section* symtab_section, const N64Recomp::ElfParsingConfig& elf_config, bool dumping_context, std::unordered_map<uint16_t, std::vector<N64Recomp::DataSymbol>>& data_syms) {
+    bool found_entrypoint_func = false;
+    ELFIO::symbol_section_accessor symbols{ elf_file, symtab_section };
+
+    std::unordered_map<uint16_t, uint16_t> bss_section_to_target_section{};
+
+    // Ranges absorbed by a severed-function extension. A function symbol IN THE SAME SECTION that
+    // falls strictly inside one is a spurious mid-function split (the severed func branches/flows
+    // into it); skip it so it doesn't overlap the extended owner (overlap silently empties one).
+    // Section-scoped: the 73 NI overlays all share vram 0x0F000000, so a range must NOT absorb other
+    // overlays' functions at coincident addresses.
+    struct AbsorbedRange { uint16_t section; uint32_t start; uint32_t end; };
+    std::vector<AbsorbedRange> severed_absorbed_ranges;
+
+    // Create a mapping of bss section to the corresponding non-bss section. This is only used when dumping context in order
+    // for patches and mods to correctly relocate symbols in bss. This mapping only matters for relocatable sections.
+    if (dumping_context) {
+        // Process bss and reloc sections
+        for (size_t cur_section_index = 0; cur_section_index < context.sections.size(); cur_section_index++) {
+            const N64Recomp::Section& cur_section = context.sections[cur_section_index];
+            // Check if a bss section was found that corresponds with this section.
+            if (cur_section.bss_section_index != (uint16_t)-1) {
+                bss_section_to_target_section[cur_section.bss_section_index] = cur_section_index;
+            }
+        }
+    }
+
+    // SESSION 44: process symbols in ascending (section, address) order. The severed-fix
+    // absorption can only suppress spurious mid-function splits processed AFTER the owning
+    // function's extension, and blind-splat symtabs (LoD) list the tail pieces BEFORE their
+    // owner (func_80001764 preceded func_8000163C), so symtab order left them unabsorbed.
+    // Also collect NAMED FUNCTION ANCHORS: symbols whose names are not auto-generated
+    // (libultra names from signature matching, decomp names) are ground truth — the
+    // severed-fix extension must never cross one (it absorbed osGetCount_recomp, silently
+    // unwiring the reimplemented native, when a pad-tail false positive extended a neighbor).
+    std::vector<int> sym_order;
+    std::unordered_map<uint16_t, std::vector<uint32_t>> named_anchors_by_section;
+    {
+        struct SymKey { ELFIO::Elf_Half section; ELFIO::Elf64_Addr value; int index; };
+        // A splat / N64Recomp AUTO-GENERATED label embeds its own 8-hex-digit address in its name
+        // (func_/static_/.L already excluded below by prefix, plus D_/prt_/jtbl_/jpt_/B_… — e.g. CV64's
+        // spurious mid-function split `prt_80040c08_6bd09446` @ 0x80040C08). Such a symbol is NEVER a
+        // ground-truth boundary: it IS exactly the spurious-split class the severed-net exists to absorb.
+        // The old filter only excluded the 3 common prefixes, so a `prt_`/`D_` symbol splat typed as FUNC
+        // leaked in as a HARD anchor and re-capped the truncation extension at its own address — that is the
+        // CV64 TITLE_DEMO func_80040B10 regression (severed-net repaired it 66→77w until the anchor blocked
+        // it). Case-insensitive: symbol files vary in hex casing.
+        auto name_embeds_own_addr = [](const std::string& nm, uint32_t val) -> bool {
+            return nm.find(fmt::format("{:08x}", val)) != std::string::npos
+                || nm.find(fmt::format("{:08X}", val)) != std::string::npos;
+        };
+        std::vector<SymKey> keys;
+        keys.reserve(symbols.get_symbols_num());
+        for (int i = 0; i < symbols.get_symbols_num(); i++) {
+            std::string   k_name;
+            ELFIO::Elf64_Addr    k_value;
+            ELFIO::Elf_Xword     k_size;
+            unsigned char k_bind, k_type, k_other;
+            ELFIO::Elf_Half      k_section;
+            symbols.get_symbol(i, k_name, k_value, k_size, k_bind, k_type, k_section, k_other);
+            keys.push_back({ k_section, k_value, i });
+            if (k_type == ELFIO::STT_FUNC && !k_name.empty() &&
+                k_name.rfind("func_", 0) != 0 && k_name.rfind("static_", 0) != 0 &&
+                k_name.rfind(".L", 0) != 0 &&
+                !name_embeds_own_addr(k_name, static_cast<uint32_t>(k_value))) {
+                named_anchors_by_section[k_section].push_back(static_cast<uint32_t>(k_value));
+            }
+            // Exact-size functions are HARD boundaries too — even auto-named func_/static_ ones — so a
+            // neighbor's falls-off-end auto-extension can't absorb a deliberately-bounded carved handler.
+            if (k_type == ELFIO::STT_FUNC && elf_config.exact_size_func_vrams.count(static_cast<uint32_t>(k_value))) {
+                named_anchors_by_section[k_section].push_back(static_cast<uint32_t>(k_value));
+            }
+        }
+        std::stable_sort(keys.begin(), keys.end(), [](const SymKey& a, const SymKey& b) {
+            if (a.section != b.section) return a.section < b.section;
+            return a.value < b.value;
+        });
+        sym_order.reserve(keys.size());
+        for (const SymKey& k : keys) sym_order.push_back(k.index);
+        for (auto& [sec, addrs] : named_anchors_by_section) {
+            std::sort(addrs.begin(), addrs.end());
+        }
+    }
+
+    for (int sym_order_index = 0; sym_order_index < (int)sym_order.size(); sym_order_index++) {
+        int sym_index = sym_order[sym_order_index];
+        std::string   name;
+        ELFIO::Elf64_Addr    value;
+        ELFIO::Elf_Xword     size;
+        unsigned char bind;
+        unsigned char type;
+        ELFIO::Elf_Half      section_index;
+        unsigned char other;
+        bool ignored = false;
+        bool reimplemented = false;
+        bool recorded_symbol = false;
+        bool size_overridden = false;
+
+        // Read symbol properties
+        symbols.get_symbol(sym_index, name, value, size, bind, type,
+            section_index, other);
+
+        if (section_index == ELFIO::SHN_ABS && elf_config.use_absolute_symbols) {
+            uint32_t vram = static_cast<uint32_t>(value);
+            context.functions_by_vram[vram].push_back(context.functions.size());
+
+            context.functions.emplace_back(
+                vram,
+                0,
+                std::vector<uint32_t>{},
+                std::move(name),
+                0,
+                true,
+                reimplemented,
+                false
+            );
+            continue;
+        }
+
+        if (section_index < context.sections.size()) {
+            // Check if this symbol is the entrypoint
+            // TODO this never fires, the check is broken due to signedness
+            if (elf_config.has_entrypoint && value == elf_config.entrypoint_address && type == ELFIO::STT_FUNC) {
+                if (found_entrypoint_func) {
+                    fmt::print(stderr, "Ambiguous entrypoint: {}\n", name);
+                    return false;
+                }
+                found_entrypoint_func = true;
+                fmt::print("Found entrypoint, original name: {}\n", name);
+                size = 0x50; // dummy size for entrypoints, should cover them all
+                name = "recomp_entrypoint";
+            }
+
+            // Check if this symbol has a size override
+            auto size_find = elf_config.manually_sized_funcs.find(name);
+            if (size_find != elf_config.manually_sized_funcs.end()) {
+                size = size_find->second;
+                type = ELFIO::STT_FUNC;
+                size_overridden = true;
+            }
+
+            if (!dumping_context) {
+                if (N64Recomp::reimplemented_funcs.contains(name)) {
+                    reimplemented = true;
+                    name = name + "_recomp";
+                    ignored = true;
+                } else if (N64Recomp::ignored_funcs.contains(name)) {
+                    name = name + "_recomp";
+                    ignored = true;
+                }
+            }
+
+            auto& section = context.sections[section_index];
+
+            // Check if this symbol is a function or has no type (like a regular glabel would)
+            // Symbols with no type have a dummy entry created so that their symbol can be looked up for function calls
+            if (ignored || type == ELFIO::STT_FUNC || type == ELFIO::STT_NOTYPE || type == ELFIO::STT_OBJECT) {
+                if (!dumping_context) {
+                    if (N64Recomp::renamed_funcs.contains(name)) {
+                        name = name + "_recomp";
+                        ignored = false;
+                    }
+                }
+
+                if (section_index < context.sections.size()) {
+                    auto section_offset = value - elf_file.sections[section_index]->get_address();
+                    uint32_t vram = static_cast<uint32_t>(value);
+                    // Skip a function symbol that a prior severed-function extension already absorbed
+                    // (a spurious mid-function split) -- emitting it would overlap its real owner and
+                    // the recompiler would silently empty one of them.
+                    if (type == ELFIO::STT_FUNC) {
+                        bool absorbed = false;
+                        for (const auto& r : severed_absorbed_ranges) { if (r.section == section_index && vram > r.start && vram < r.end) { absorbed = true; break; } }
+                        if (absorbed) { N64Recomp::diag::hit({ .kind = "severed-extend", .vaddr = vram, .func = name, .detail = "absorbed-split", .section_index = (uint32_t)section_index }); fmt::print(stderr, "[severed-fix] absorbed spurious split {} @ 0x{:08X}\n", name, vram); continue; }
+                    }
+                    uint32_t num_instructions = type == ELFIO::STT_FUNC ? size / 4 : 0;
+                    uint32_t rom_address = static_cast<uint32_t>(section_offset + section.rom_addr);
+                    // GENERAL FIX (sweep): clamp num_instructions to what context.rom actually holds from
+                    // rom_address. A symbol with a bad value (section_offset underflowed to a huge uint32) or a
+                    // size running past the ROM end would make the insn_words.assign(words, words + N) below read
+                    // off the end of the ROM -> SEGFAULT, which surfaced as a mislabeled "L2 recomp stuck"
+                    // (revolt, southpark, and a chunk of the Tier-D CIC-6103 cluster). Never read past the ROM.
+                    if (rom_address >= context.rom.size() ||
+                        (size_t)num_instructions * 4 > context.rom.size() - rom_address) {
+                        uint32_t clamped = rom_address >= context.rom.size()
+                            ? 0u : (uint32_t)((context.rom.size() - rom_address) / 4);
+                        if (num_instructions != clamped) {
+                            N64Recomp::diag::hit({ .kind = "rom-bounds-clamp", .vaddr = static_cast<uint32_t>(value), .func = name, .a = rom_address, .b = num_instructions, .c = clamped, .d = (uint32_t)context.rom.size(), .section_index = (uint32_t)section_index });
+                            fmt::print(stderr, "[rom-clamp] {} @ 0x{:08X} rom 0x{:X} size {}w -> {}w (would read past ROM end)\n",
+                                       name, static_cast<uint32_t>(value), rom_address, num_instructions, clamped);
+                        }
+                        num_instructions = clamped;
+                    }
+                    const uint32_t* words = reinterpret_cast<const uint32_t*>(context.rom.data() + rom_address);
+
+                    section.function_addrs.push_back(vram);
+                    context.functions_by_vram[vram].push_back(context.functions.size());
+
+                    // Find the entrypoint by rom address in case it doesn't have vram as its value
+                    if (elf_config.has_entrypoint && rom_address == 0x1000 && type == ELFIO::STT_FUNC) {
+                        vram = elf_config.entrypoint_address;
+                        found_entrypoint_func = true;
+                        name = "recomp_entrypoint";
+                        if (size == 0) {
+                            num_instructions = 0x50 / 4;
+                        }
+                    }
+
+                    // Suffix local symbols to prevent name conflicts.
+                    if (bind == ELFIO::STB_LOCAL) {
+                        name = fmt::format("{}_{:08X}", name, rom_address);
+                    }
+
+                    if (num_instructions > 0) {
+                        context.section_functions[section_index].push_back(context.functions.size());
+                        recorded_symbol = true;
+                    }
+                    context.functions_by_name[name] = context.functions.size();
+
+                    std::vector<uint32_t> insn_words(num_instructions);
+                    insn_words.assign(words, words + num_instructions);
+
+                    // SESSION 25 (Alucard) — repair SEVERED functions (general correctness fix).
+                    // A spurious symbol landing mid-function truncates it: the piece keeps its
+                    // stack-frame prologue (addiu $sp,$sp,-X) but loses its epilogue/return, so the
+                    // recompiled function falls off the end WITHOUT restoring callee-saved registers
+                    // (the register-corruption class behind CV64's func_80040B10 / the r18 bug).
+                    // Signature: has a stack frame but no `jr $ra` in its body. Extend it through the
+                    // following ROM words to its real return so the whole function is recompiled.
+                    // Words are stored byteswapped-from-real (see recompilation.cpp byteswap(word)).
+                    // NOTE: applies even to manually-sized funcs — a wrong size override (e.g. CV64's
+                    // gen_cv64_toml gap-based sizes) is exactly how a function loses its return here.
+                    // Works on KSEG0 main code AND relocatable NI overlays (0x0E/0x0F). The overlay
+                    // case is critical: a severed overlay function (split by a spurious mid-function
+                    // symbol) branches to a target PAST its cut, which the recompiler can't resolve ->
+                    // it emits an EMPTY body -> the enemy/cutscene that dispatches it no-ops forever
+                    // (skeleton_warrior's func_0F0006FC, split by spurious func_0F000F38 -> the
+                    // "Skeletons Come To Life" cutscene hangs). Extend through the ROM to the real
+                    // return. Paired with the non-fatal unhandled-instruction handling in
+                    // recompilation.cpp so a stray opcode in the extended tail can't abort the recomp.
+                    if (type == ELFIO::STT_FUNC && !ignored && !reimplemented && insn_words.size() >= 4) {
+                        auto bswap = [](uint32_t w) -> uint32_t {
+                            return ((w >> 24) & 0xFFu) | ((w >> 8) & 0xFF00u) | ((w << 8) & 0xFF0000u) | ((w << 24) & 0xFF000000u);
+                        };
+                        // SESSION 44 (LoD): an UNCONDITIONAL control transfer — the only instructions a
+                        // MIPS function can legitimately end after (followed by its delay slot). A
+                        // conditional branch falls through past the declared end exactly like a non-CTI
+                        // tail, and jal/jalr return, so none of those can terminate a function. This is
+                        // stricter than the old "any CTI" test, which let blind-splat's spurious splits
+                        // through: LoD's func_8000163C is cut at a <beqz, nop> pair, with its switch tail
+                        // mislabeled func_80001764 (whose body branches BACK before its own start).
+                        auto is_uncond_term = [](uint32_t w) -> bool {
+                            uint32_t op = w >> 26;
+                            if (op == 0) return (w & 0x3F) == 0x08;                  // jr (return / jtbl / tail call)
+                            if (op == 2) return true;                                // j (tail call / loop)
+                            uint32_t rs = (w >> 21) & 0x1F, rt = (w >> 16) & 0x1F;
+                            if ((op == 4 || op == 0x14) && rs == rt) return true;    // b = beq/beql rs==rt
+                            if (op == 1 && rs == 0 && (rt == 1 || rt == 3)) return true; // bgez/bgezl $zero
+                            return false;
+                        };
+                        bool has_frame = (bswap(insn_words[0]) & 0xFFFF0000u) == 0x27BD0000u && (bswap(insn_words[0]) & 0x8000u); // addiu $sp,$sp,-X
+                        bool has_return = false;
+                        for (uint32_t w : insn_words) { if (bswap(w) == 0x03E00008u) { has_return = true; break; } }
+                        // A correctly-bounded function ends in <terminator><delay-slot>. If the declared
+                        // tail has no unconditional terminator, control falls THROUGH the end -> a
+                        // too-small size truncated it. Caught even when an EARLY `jr $ra` exists
+                        // (e.g. getCurrentlySteppingMapPieceIndex, sized 204, really 556).
+                        // SESSION 44: gap-derived sizes (blind splat) include trailing ALIGNMENT NOPS —
+                        // trim them before judging the tail (a <jr $ra><nop><nop..> tail is a clean end,
+                        // not a truncation; the untrimmed test extended alSynSetPan into osGetCount).
+                        size_t n_eff = insn_words.size();
+                        while (n_eff > 0 && bswap(insn_words[n_eff - 1]) == 0u) n_eff--;
+                        bool falls_off_end;
+                        if (n_eff < 2) {
+                            falls_off_end = false; // all nops / degenerate — leave untouched
+                        } else {
+                            // terminator either at n_eff-2 (real delay slot kept) or at n_eff-1
+                            // (its delay-slot nop was trimmed).
+                            falls_off_end = !is_uncond_term(bswap(insn_words[n_eff - 2]))
+                                         && !is_uncond_term(bswap(insn_words[n_eff - 1]));
+                        }
+                        // Overlay window (0x0E/0x0F -- relocatable NI overlays AND fixed hasm cutscene
+                        // overlays, which are NOT flagged relocatable): ONLY the unambiguous severed
+                        // signature (frame, no return); their data tails make falls_off_end over-extend.
+                        // KSEG0 main code (>= 0x80000000): also catch falls-off-end.
+                        bool in_overlay = section.relocatable || (vram >= 0x0E000000u && vram < 0x10000000u);
+                        // SESSION (Army Men): for KSEG0 main code, extend ONLY on falls_off_end (the body
+                        // ends without an unconditional terminator = genuinely truncated). The old extra
+                        // `has_frame && !has_return` disjunct over-absorbed COMPLETE functions that end in an
+                        // INDIRECT TAIL CALL (`jr $reg`, not `jr $ra`) — they have a frame and no `jr $ra`,
+                        // yet are not severed (falls_off_end is already false because `jr` IS a terminator).
+                        // Army Men: Sarge's Heroes uses indirect tail calls heavily; this disjunct swallowed
+                        // 53 real functions (incl. thread entries + render funcs reached via function pointers)
+                        // into their predecessors, leaving them un-recompiled (interp-net only) so the render
+                        // never ran. A spurious split always leaves its predecessor falling off the end, so
+                        // falls_off_end still catches every genuine severed case (LoD/CV64). Overlays keep the
+                        // (has_frame && !has_return) signature — their data tails make falls_off_end unreliable.
+                        bool detect = in_overlay ? (has_frame && !has_return)
+                                                 : falls_off_end;
+                        // An exact-size function is ground truth: never auto-extend it (its declared bound is
+                        // intentional — a carved bare-metal handler that flows into the next handler by design,
+                        // reached via a runtime jr-dispatch, NOT a severed split to repair).
+                        if (elf_config.exact_size_func_vrams.count(vram)) {
+                            detect = false;
+                        }
+                        if (detect) {
+                            // CFG-aware extension into a TEMP buffer; commit ONLY if a clean end is found
+                            // within the cap (capping = ran into data, a false positive -> leave untouched).
+                            std::vector<uint32_t> ext = insn_words;
+                            size_t max_words = ext.size() + 0x800;
+                            // Seed max_target with the furthest FORWARD branch target already in the body:
+                            // a severed func often branches PAST its cut (into the split-off tail), so we
+                            // must extend at least that far for the recompiler to resolve the target.
+                            uint32_t max_target = vram + (uint32_t)ext.size() * 4;
+                            for (size_t bi = 0; bi + 1 < insn_words.size(); ++bi) {
+                                uint32_t bw = bswap(insn_words[bi]); uint32_t bo = bw >> 26;
+                                if ((bo == 1) || (bo >= 4 && bo <= 7) || (bo >= 0x14 && bo <= 0x17) || (bo == 0x11 && ((bw >> 21) & 0x1F) == 0x08)) {
+                                    uint32_t bt = vram + (uint32_t)bi * 4 + 4 + (uint32_t)(((int32_t)(int16_t)(bw & 0xFFFF)) << 2);
+                                    if (bt > max_target) max_target = bt;
+                                }
+                            }
+                            // SESSION 44: never extend across a NAMED function anchor (libultra /
+                            // decomp names are ground truth; absorbing one silently unwires its
+                            // native reimplementation). Auto-named func_/static_ symbols stay
+                            // absorbable — they are exactly the spurious-split class this net exists for.
+                            uint32_t hard_cap_vram = 0xFFFFFFFFu;
+                            {
+                                auto anchors_it = named_anchors_by_section.find((uint16_t)section_index);
+                                if (anchors_it != named_anchors_by_section.end()) {
+                                    const auto& anchors = anchors_it->second;
+                                    auto up = std::upper_bound(anchors.begin(), anchors.end(), vram);
+                                    if (up != anchors.end()) hard_cap_vram = *up;
+                                }
+                            }
+                            // SESSION (DK64): a forward `j` normally TERMINATES extension (tail call).
+                            // But a HANDWRITTEN function split across decomp glabels shares ONE stack
+                            // frame across chunks linked by `j`: the head holds the prologue (addiu
+                            // $sp,-X), a later chunk holds the epilogue (addiu $sp,+X; jr $ra). Such a
+                            // continuation chunk BRANCHES BACK into the body already absorbed — DK64's
+                            // matrix routine func_806195D0 (frame 0x58) tail-jumps to func_8061A938,
+                            // whose loop does `bne ...,L_8061A8AC` to an address BEFORE its own start.
+                            // A real tail call never branches back into its caller. If we stop at that
+                            // `j`, func_8061A938 stays a separate function; its backward branch can't
+                            // resolve to an in-function label, so the recompiler emits a frame-skipping
+                            // `return` (recompilation.cpp print_branch) -> sp leaks -0x58 every call ->
+                            // register corruption -> DK64 black screen. So: if a forward `j` target's
+                            // chunk branches back into [vram, tj), it is a continuation — keep extending
+                            // through it so the shared epilogue's sp-restore IS recompiled.
+                            auto j_target_is_continuation = [&](uint32_t tj) -> bool {
+                                if (tj <= vram) return false;            // backward j = loop, keep as terminator
+                                size_t tj_off = (size_t)rom_address + (size_t)(tj - vram);
+                                for (size_t k = 0; k < 0x300; ++k) {     // scan chunk up to its own return
+                                    size_t o = tj_off + k * 4;
+                                    if (o + 4 > context.rom.size()) break;
+                                    uint32_t cw = bswap(*reinterpret_cast<const uint32_t*>(context.rom.data() + o));
+                                    uint32_t cop = cw >> 26;
+                                    bool cbr = (cop == 1) || (cop >= 4 && cop <= 7) || (cop >= 0x14 && cop <= 0x17)
+                                            || (cop == 0x11 && ((cw >> 21) & 0x1F) == 0x08);
+                                    if (cbr) {
+                                        uint32_t ct = tj + (uint32_t)k * 4 + 4 + (uint32_t)(((int32_t)(int16_t)(cw & 0xFFFF)) << 2);
+                                        if (ct >= vram && ct < tj) return true; // branches BACK => continuation
+                                    }
+                                    if (cw == 0x03E00008u) break;        // chunk's own `jr $ra` bounds the scan
+                                }
+                                return false;
+                            };
+                            bool prev_was_term = false, found = false;
+                            while (ext.size() < max_words) {
+                                uint32_t cur_vram = vram + (uint32_t)ext.size() * 4;
+                                if (cur_vram >= hard_cap_vram) {
+                                    // Would cross a named anchor. If we just closed on <term><delay>
+                                    // flush against it, that IS the clean end; otherwise bail uncommitted.
+                                    if (prev_was_term && cur_vram > max_target) found = true;
+                                    break;
+                                }
+                                size_t off = (size_t)rom_address + ext.size() * 4;
+                                if (off + 4 > context.rom.size()) break;
+                                uint32_t raw = *reinterpret_cast<const uint32_t*>(context.rom.data() + off);
+                                ext.push_back(raw);
+                                if (prev_was_term && cur_vram > max_target) { found = true; break; }
+                                prev_was_term = false;
+                                uint32_t w = bswap(raw);
+                                uint32_t op = w >> 26;
+                                bool is_pcrel_branch = (op == 1) || (op >= 4 && op <= 7) || (op >= 0x14 && op <= 0x17)
+                                                    || (op == 0x11 && ((w >> 21) & 0x1F) == 0x08);
+                                if (is_pcrel_branch) {
+                                    uint32_t tgt = cur_vram + 4 + (uint32_t)(((int32_t)(int16_t)(w & 0xFFFF)) << 2);
+                                    if (tgt > max_target) max_target = tgt;
+                                }
+                                if (w == 0x03E00008u) {
+                                    prev_was_term = true; // jr $ra
+                                } else if (op == 2) {
+                                    // j: tail-call terminator UNLESS it jumps forward into a frame-sharing
+                                    // continuation chunk (handwritten function split across glabels).
+                                    uint32_t tj = ((cur_vram + 4) & 0xF0000000u) | ((w & 0x03FFFFFFu) << 2);
+                                    if (tj > cur_vram && j_target_is_continuation(tj)) {
+                                        if (tj > max_target) max_target = tj; // keep extending to absorb the continuation
+                                    } else {
+                                        prev_was_term = true; // genuine tail call
+                                    }
+                                }
+                            }
+                            if (found && ext.size() > insn_words.size()) {
+                                N64Recomp::diag::hit({ .kind = "severed-extend", .vaddr = vram, .func = name, .detail = section.relocatable ? "overlay" : "extended", .a = (uint32_t)insn_words.size(), .b = (uint32_t)ext.size(), .section_index = (uint32_t)section_index });
+                                fmt::print(stderr, "[severed-fix] {} @ 0x{:08X}: {}{} extended {} -> {} words\n",
+                                    name, vram, (section.relocatable ? "overlay; " : ""),
+                                    (!has_return ? "no return;" : "no unconditional end;"),
+                                    insn_words.size(), ext.size());
+                                severed_absorbed_ranges.push_back({ (uint16_t)section_index, vram, vram + (uint32_t)ext.size() * 4 });
+                                insn_words = std::move(ext);
+                            }
+                        }
+                    }
+
+                    context.functions.emplace_back(
+                        vram,
+                        rom_address,
+                        std::move(insn_words),
+                        name,
+                        section_index,
+                        ignored,
+                        reimplemented
+                    );
+                } else {
+                    // TODO is this case needed anymore?
+                    uint32_t vram = static_cast<uint32_t>(value);
+                    section.function_addrs.push_back(vram);
+                    context.functions_by_vram[vram].push_back(context.functions.size());
+                    context.functions.emplace_back(
+                        vram,
+                        0,
+                        std::vector<uint32_t>{},
+                        name,
+                        section_index,
+                        ignored,
+                        reimplemented
+                    );
+                }
+            }
+        }
+
+        // The symbol wasn't detected as a function, so add it to the data symbols if the context is being dumped.
+        if (!recorded_symbol && dumping_context && !name.empty()) {
+            // Skip internal symbols.
+            if (ELF_ST_VISIBILITY(other) != ELFIO::STV_INTERNAL) {
+                uint32_t vram = static_cast<uint32_t>(value);
+
+                // Place this symbol in the absolute symbol list if it's in the absolute section.
+                uint16_t target_section_index = section_index;
+                if (section_index == ELFIO::SHN_ABS) {
+                    target_section_index = N64Recomp::SectionAbsolute;
+                }
+                else if (section_index >= context.sections.size()) {
+                    fmt::print("Symbol \"{}\" not in a valid section ({})\n", name, section_index);
+                }
+
+                // Move this symbol into the corresponding non-bss section if it's in a bss section and the paired section is relocatable.
+                auto find_bss_it = bss_section_to_target_section.find(target_section_index);
+                if (find_bss_it != bss_section_to_target_section.end()) {
+                    uint16_t new_target_section_index = find_bss_it->second;
+                    if (new_target_section_index < context.sections.size() && context.sections[new_target_section_index].relocatable) {
+                        target_section_index = find_bss_it->second;
+                    }
+                }
+
+                data_syms[target_section_index].emplace_back(
+                    vram,
+                    std::move(name)
+                );
+            }
+        }
+    }
+
+    return found_entrypoint_func;
+}
+
+struct SegmentEntry {
+    ELFIO::Elf64_Off data_offset;
+    ELFIO::Elf64_Addr physical_address;
+    ELFIO::Elf_Xword memory_size;
+};
+
+std::optional<size_t> get_segment(const std::vector<SegmentEntry>& segments, ELFIO::Elf_Xword section_size, ELFIO::Elf64_Off section_offset) {
+    // A linear search is safest even if the segment list is sorted, as there may be overlapping segments
+    for (size_t i = 0; i < segments.size(); i++) {
+        const auto& segment = segments[i];
+
+        // Check that the section's data in the elf file is within bounds of the segment's data
+        if (section_offset >= segment.data_offset && section_offset + section_size <= segment.data_offset + segment.memory_size) {
+            return i;
+        }
+    }
+
+    return std::nullopt;
+}
+
+ELFIO::section* read_sections(N64Recomp::Context& context, ELFIO::section*& mdebug_section_out, const N64Recomp::ElfParsingConfig& elf_config, const ELFIO::elfio& elf_file) {
+    ELFIO::section* symtab_section = nullptr;
+    std::vector<SegmentEntry> segments{};
+    segments.resize(elf_file.segments.size());
+    bool has_reference_symbols = context.has_reference_symbols();
+
+    // Copy the data for each segment into the segment entry list
+    for (size_t segment_index = 0; segment_index < elf_file.segments.size(); segment_index++) {
+        const auto& segment = *elf_file.segments[segment_index];
+        segments[segment_index].data_offset = segment.get_offset();
+        segments[segment_index].physical_address = segment.get_physical_address();
+        segments[segment_index].memory_size = segment.get_file_size();
+    }
+
+    //// Sort the segments by physical address
+    //std::sort(segments.begin(), segments.end(),
+    //    [](const SegmentEntry& lhs, const SegmentEntry& rhs) {
+    //        return lhs.data_offset < rhs.data_offset;
+    //    }
+    //);
+
+    std::unordered_map<std::string, ELFIO::section*> reloc_sections_by_name;
+    std::unordered_map<std::string, ELFIO::section*> bss_sections_by_name;
+
+    // First pass over the sections to find the load addresses and track the minimum load address value. This mimics the objcopy raw binary output behavior.
+    uint32_t min_load_address = (uint32_t)-1;
+    for (const auto& section : elf_file.sections) {
+        auto& section_out = context.sections[section->get_index()];
+        ELFIO::Elf_Word type = section->get_type();
+        ELFIO::Elf_Xword flags = section->get_flags();
+        ELFIO::Elf_Xword section_size = section->get_size();
+
+        // Check if this section will end up in the ROM. It must not be a nobits (NOLOAD) type, must have the alloc flag set and must have a nonzero size.
+        if (type != ELFIO::SHT_NOBITS && (flags & ELFIO::SHF_ALLOC) && section_size != 0) {
+            std::optional<size_t> segment_index = get_segment(segments, section_size, section->get_offset());
+            if (!segment_index.has_value()) {
+                fmt::print(stderr, "Could not find segment that section {} belongs to!\n", section->get_name());
+                return nullptr;
+            }
+
+            const SegmentEntry& segment = segments[segment_index.value()];
+            // Calculate the load address of the section based on that of the segment.
+            // This will get modified afterwards in the next pass to offset by the minimum load address.
+            section_out.rom_addr = segment.physical_address + (section->get_offset() - segment.data_offset);
+            // Track the minimum load address.
+            min_load_address = std::min(min_load_address, section_out.rom_addr);
+        }
+        else {
+            // Otherwise mark this section as having an invalid rom address
+            section_out.rom_addr = (uint32_t)-1;
+        }
+    }
+
+    // Iterate over every section to record rom addresses and find the symbol table
+    for (const auto& section : elf_file.sections) {
+        auto& section_out = context.sections[section->get_index()];
+        //fmt::print("  {}: {} @ 0x{:08X}, 0x{:08X}\n", section->get_index(), section->get_name(), section->get_address(), context.rom.size());
+        // Set the rom address of this section to the current accumulated ROM size
+        section_out.ram_addr = section->get_address();
+        section_out.size = section->get_size();
+        ELFIO::Elf_Word type = section->get_type();
+        std::string section_name = section->get_name();
+
+        // Check if this section is the symbol table and record it if so
+        if (type == ELFIO::SHT_SYMTAB) {
+            symtab_section = section.get();
+        }
+
+        // Check if this section is an mdebug section and record it if so. Note we expect just one mdebug section
+        if (type == 0x70000005/* SHT_MIPS_DEBUG */) {
+            mdebug_section_out = section.get();
+        }
+
+        if (elf_config.all_sections_relocatable || elf_config.relocatable_sections.contains(section_name)) {
+            section_out.relocatable = true;
+        }
+
+        // Check if this section is a reloc section
+        if (type == ELFIO::SHT_REL) {
+            // If it is, determine the name of the section it relocates
+            if (!section_name.starts_with(".rel")) {
+                fmt::print(stderr, "Could not determine corresponding section for reloc section {}\n", section_name.c_str());
+                return nullptr;
+            }
+
+            // FIXME This should be using SH_INFO to create a reloc section to target section mapping instead of using the name.
+            std::string reloc_target_section = section_name.substr(strlen(".rel"));
+
+            // If this reloc section is for a section that has been marked as relocatable, record it in the reloc section lookup.
+            // Alternatively, if this recompilation uses reference symbols then record all reloc sections.
+            bool section_is_relocatable = elf_config.all_sections_relocatable || elf_config.relocatable_sections.contains(reloc_target_section);
+            if (has_reference_symbols || section_is_relocatable) {
+                reloc_sections_by_name[reloc_target_section] = section.get();
+            }
+        }
+
+        // If the section is bss (SHT_NOBITS) and ends with the bss suffix, add it to the bss section map
+        if (type == ELFIO::SHT_NOBITS && section_name.ends_with(elf_config.bss_section_suffix)) {
+            std::string bss_target_section = section_name.substr(0, section_name.size() - elf_config.bss_section_suffix.size());
+
+            if (!bss_target_section.empty()) {
+                bss_sections_by_name[bss_target_section] = section.get();
+            }
+        }
+
+        // If this section was marked as being in the ROM in the previous pass, copy it into the ROM now.
+        if (section_out.rom_addr != (uint32_t)-1) {
+            // Adjust the section's final ROM address to account for the minimum load address.
+            section_out.rom_addr -= min_load_address;
+            // Resize the output rom if needed to fit this section.
+            size_t required_rom_size = section_out.rom_addr + section_out.size;
+            if (required_rom_size > context.rom.size()) {
+                context.rom.resize(required_rom_size);
+            }
+            // Copy this section's data into the rom.
+            std::copy(section->get_data(), section->get_data() + section->get_size(), &context.rom[section_out.rom_addr]);
+        }
+        // Check if this section is marked as executable, which means it has code in it
+        if (section->get_flags() & ELFIO::SHF_EXECINSTR) {
+            section_out.executable = true;
+        }
+        section_out.name = section_name;
+    }
+
+    // GENERAL FIX (KI Gold, section-boundary overrun): splat/objcopy round each section's size UP to
+    // its alignment (e.g. 16). When a function begins exactly at a section boundary, that padding makes
+    // the PREVIOUS section's [ram_addr, ram_addr+size) range spill over the next section's start by a
+    // few words. resolve_jal() then sees the next section's function as "in the current section" but
+    // with no same-section match, so it manufactures a TRUNCATED same-section static_<prev>_<addr>
+    // stub covering only the spilled words (here: 2 of the 40 instructions of func_80002B80, a bzero).
+    // Same-section jal callers bind to that empty stub instead of the real cross-section function, so
+    // the callee silently does nothing. (KI Gold's decompressor: func_80000960's `jal 0x80002B80`
+    // bound to the 8-byte static_4_80002B80 -> the Huffman bit-length count buffer was never zeroed ->
+    // corrupt decode tables -> the unpacker consumed input but emitted no bytes -> 60fps black screen.)
+    // Fix: clamp every non-relocatable, in-ROM executable section's size so its address range never
+    // extends past the start of any other distinct in-ROM section. The ROM data was already copied
+    // above using the raw size, so this only narrows function/jal boundary detection -- exactly the
+    // overrun bytes, which genuinely belong to the next section. Overlays (relocatable, often sharing
+    // the same start address) are skipped, and only a STRICTLY-INSIDE start triggers a clamp, so
+    // legitimately-adjacent or co-resident sections are unaffected.
+    for (size_t si = 0; si < context.sections.size(); si++) {
+        N64Recomp::Section& sec = context.sections[si];
+        if (sec.rom_addr == (uint32_t)-1 || !sec.executable || sec.relocatable || sec.size == 0) {
+            continue;
+        }
+        uint32_t sec_start = sec.ram_addr;
+        uint32_t sec_end = sec.ram_addr + sec.size;
+        for (size_t sj = 0; sj < context.sections.size(); sj++) {
+            if (sj == si) {
+                continue;
+            }
+            const N64Recomp::Section& other = context.sections[sj];
+            if (other.rom_addr == (uint32_t)-1 || other.size == 0) {
+                continue;
+            }
+            // Another distinct section that starts strictly inside this one => this section's tail is
+            // padding that overruns into the next section. Clamp to the earliest such start.
+            // BUT only when `other` shares this section's rom->ram mapping (a genuinely-ADJACENT section in
+            // the same load region). A section at a DIFFERENT load region with the same vram — e.g. a
+            // decompressed code OVERLAY (.ovl_hdcode, low LMA 0x800000) overlapping the resident's same-vram
+            // PLACEHOLDER (.main_*, high resident rom) — is a real co-resident overlap, NOT a padding overrun.
+            // Clamping the overlay there shrinks it below its rodata/jump-table tail, so the cross-section
+            // jtbl read falls through to the placeholder's garbage -> jtbl-size-fail and the function stubs.
+            // (General overlay fix; first hit by Blast Corps' hd_code overlay + its jtbl rodata.)
+            if (other.ram_addr > sec_start && other.ram_addr < sec_end &&
+                (int64_t)other.rom_addr - (int64_t)sec.rom_addr == (int64_t)other.ram_addr - (int64_t)sec.ram_addr) {
+                sec_end = other.ram_addr;
+            }
+        }
+        uint32_t clamped_size = sec_end - sec_start;
+        if (clamped_size != sec.size) {
+            fmt::print(stderr, "[section-clamp] {} size 0x{:X} -> 0x{:X} (padding overran into the next section at 0x{:08X})\n",
+                       sec.name, (uint32_t)sec.size, clamped_size, sec_end);
+            sec.size = clamped_size;
+        }
+    }
+
+    if (symtab_section == nullptr) {
+        fmt::print(stderr, "No symtab section found\n");
+        return nullptr;
+    }
+
+    ELFIO::symbol_section_accessor symbol_accessor{ elf_file, symtab_section };
+    auto num_syms = symbol_accessor.get_symbols_num();
+
+    // TODO make sure that a reloc section was found for every section marked as relocatable
+
+    // Process bss and reloc sections
+    for (size_t section_index = 0; section_index < context.sections.size(); section_index++) {
+        N64Recomp::Section& section_out = context.sections[section_index];
+        // Check if a bss section was found that corresponds with this section
+        auto bss_find = bss_sections_by_name.find(section_out.name);
+        if (bss_find != bss_sections_by_name.end()) {
+            section_out.bss_section_index = bss_find->second->get_index();
+            section_out.bss_size = bss_find->second->get_size();
+            context.bss_section_to_section[section_out.bss_section_index] = section_index;
+        }
+
+        // Check if this section is in the ROM and relocatable.
+        const ELFIO::section* elf_section = elf_file.sections[section_index];
+        bool in_rom = (elf_section->get_type() != ELFIO::SHT_NOBITS) && (elf_section->get_flags() & ELFIO::SHF_ALLOC);
+        bool is_relocatable = section_out.relocatable || context.has_reference_symbols();
+        if (in_rom && is_relocatable) {
+            // Check if a reloc section was found that corresponds with this section
+            auto reloc_find = reloc_sections_by_name.find(section_out.name);
+            if (reloc_find != reloc_sections_by_name.end()) {
+                // Create an accessor for the reloc section
+                ELFIO::relocation_section_accessor rel_accessor{ elf_file, reloc_find->second };
+                // Allocate space for the relocs in this section
+                section_out.relocs.resize(rel_accessor.get_entries_num());
+                // Track consecutive identical HI16 relocs to handle the GNU extension to the o32 ABI.
+                int prev_hi_count = 0;
+                // Track whether the previous reloc was a LO16
+                bool prev_lo = false;
+                uint32_t prev_hi_immediate = 0;
+                uint32_t prev_hi_symbol = std::numeric_limits<uint32_t>::max();
+
+                for (size_t i = 0; i < section_out.relocs.size(); i++) {
+                    // Get the current reloc
+                    ELFIO::Elf64_Addr rel_offset;
+                    ELFIO::Elf_Word rel_symbol;
+                    unsigned int rel_type;
+                    ELFIO::Elf_Sxword bad_rel_addend; // Addends aren't encoded in the reloc, so ignore this one
+                    rel_accessor.get_entry(i, rel_offset, rel_symbol, rel_type, bad_rel_addend);
+
+                    N64Recomp::Reloc& reloc_out = section_out.relocs[i];
+
+                    // Get the real full_immediate by extracting the immediate from the instruction
+                    uint32_t reloc_rom_addr = section_out.rom_addr + rel_offset - section_out.ram_addr;
+                    uint32_t reloc_rom_word = byteswap(*reinterpret_cast<const uint32_t*>(context.rom.data() + reloc_rom_addr));
+                    //context.rom section_out.rom_addr;
+
+                    reloc_out.address = rel_offset;
+                    reloc_out.symbol_index = rel_symbol;
+                    reloc_out.type = static_cast<N64Recomp::RelocType>(rel_type);
+
+                    std::string       rel_symbol_name;
+                    ELFIO::Elf64_Addr rel_symbol_value;
+                    ELFIO::Elf_Xword  rel_symbol_size;
+                    unsigned char     rel_symbol_bind;
+                    unsigned char     rel_symbol_type;
+                    ELFIO::Elf_Half   rel_symbol_section_index;
+                    unsigned char     rel_symbol_other;
+
+                    bool found_rel_symbol = symbol_accessor.get_symbol(
+                        rel_symbol, rel_symbol_name, rel_symbol_value, rel_symbol_size, rel_symbol_bind, rel_symbol_type, rel_symbol_section_index, rel_symbol_other);
+
+                    uint32_t rel_section_vram = 0;
+                    uint32_t rel_symbol_offset = 0;
+
+                    // Remap relocations from the current section's bss section to itself.
+                    // TODO Do this for any bss section and not just the current section's bss section?
+                    if (rel_symbol_section_index == section_out.bss_section_index) {
+                        rel_symbol_section_index = section_index;
+                    }
+
+                    // Check if the symbol is undefined and to know whether to look for it in the reference symbols.
+                    if (rel_symbol_section_index == ELFIO::SHN_UNDEF) {
+                        // Undefined sym, check the reference symbols.
+                        N64Recomp::SymbolReference sym_ref;
+                        if (!context.find_reference_symbol(rel_symbol_name, sym_ref)) {
+                            fmt::print(stderr, "Undefined symbol: {}, not found in input or reference symbols!\n",
+                                rel_symbol_name);
+                            return nullptr;
+                        }
+
+                        reloc_out.reference_symbol = true;
+                        // Replace the reloc's symbol index with the index into the reference symbol array.
+                        rel_section_vram = 0;
+                        reloc_out.target_section = sym_ref.section_index;
+                        reloc_out.symbol_index = sym_ref.symbol_index;
+                        const auto& reference_symbol = context.get_reference_symbol(reloc_out.target_section, reloc_out.symbol_index);
+                        rel_symbol_offset = reference_symbol.section_offset;
+
+                        bool target_section_relocatable = context.is_reference_section_relocatable(reloc_out.target_section);
+
+                        if (reloc_out.type == N64Recomp::RelocType::R_MIPS_32 && target_section_relocatable) {
+                            fmt::print(stderr, "Cannot reference {} in a statically initialized variable as it's defined in a relocatable section!\n",
+                                rel_symbol_name);
+                            return nullptr;
+                        }
+                    }
+                    else if (rel_symbol_section_index == ELFIO::SHN_ABS) {
+                        reloc_out.reference_symbol = false;
+                        reloc_out.target_section = N64Recomp::SectionAbsolute;
+                        rel_section_vram = 0;
+                    }
+                    else {
+                        reloc_out.reference_symbol = false;
+                        reloc_out.target_section = rel_symbol_section_index;
+                        // Handle special sections.
+                        if (rel_symbol_section_index >= context.sections.size()) {
+                            fmt::print(stderr, "Reloc {} references symbol {} which is in an unknown section 0x{:04X}!\n",
+                                i, rel_symbol_name, rel_symbol_section_index);
+                            return nullptr;
+                        }
+                        rel_section_vram = context.sections[rel_symbol_section_index].ram_addr;
+                    }
+
+                    // Reloc pairing, see MIPS System V ABI documentation page 4-18 (https://refspecs.linuxfoundation.org/elf/mipsabi.pdf)
+                    if (reloc_out.type == N64Recomp::RelocType::R_MIPS_LO16) {
+                        uint32_t rel_immediate = reloc_rom_word & 0xFFFF;
+                        uint32_t full_immediate = (prev_hi_immediate << 16) + (int16_t)rel_immediate;
+                        reloc_out.target_section_offset = full_immediate + rel_symbol_offset - rel_section_vram;
+                        if (prev_hi_count != 0) {
+                            if (prev_hi_symbol != rel_symbol) {
+                                fmt::print(stderr, "Paired HI16 and LO16 relocations have different symbols\n"
+                                                    "  LO16 reloc index {} in section {} referencing symbol {} with offset 0x{:08X}\n",
+                                    i, section_out.name, reloc_out.symbol_index, reloc_out.address);
+                                return nullptr;
+                            }
+
+                            // Set the previous HI16 relocs' relocated addresses.
+                            for (size_t paired_index = i - prev_hi_count; paired_index < i; paired_index++) {
+                                uint32_t hi_immediate = section_out.relocs[paired_index].target_section_offset;
+                                uint32_t paired_full_immediate = hi_immediate + (int16_t)rel_immediate;
+                                section_out.relocs[paired_index].target_section_offset = paired_full_immediate + rel_symbol_offset - rel_section_vram;
+                            }
+                        }
+                        else {
+                            // Orphaned LO16 reloc warnings.
+                            if (elf_config.unpaired_lo16_warnings) {
+                                if (prev_lo) {
+                                    // Don't warn if multiple LO16 in a row reference the same symbol, as some linkers will use this behavior.
+                                    if (prev_hi_symbol != rel_symbol) {
+                                        fmt::print(stderr, "[WARN] LO16 reloc index {} in section {} referencing symbol {} with offset 0x{:08X} follows LO16 with different symbol\n",
+                                            i, section_out.name, reloc_out.symbol_index, reloc_out.address);
+                                    }
+                                }
+                                else {
+                                    fmt::print(stderr, "[WARN] Unpaired LO16 reloc index {} in section {} referencing symbol {} with offset 0x{:08X}\n",
+                                        i, section_out.name, reloc_out.symbol_index, reloc_out.address);
+                                }
+                            }
+                            // Even though this is an orphaned LO16 reloc, the previous calculation for the addend still follows the MIPS System V ABI documentation:
+                            // "R_MIPS_LO16 entries without an R_MIPS_HI16 entry immediately preceding are orphaned and the previously defined
+                            // R_MIPS_HI16 is used for computing the addend."
+                            // Therefore, nothing needs to be done to the section_offset member.
+                        }
+                        prev_lo = true;
+                    } else {
+                        // Allow a HI16 to follow another HI16 for the GNU ABI extension.
+                        if (reloc_out.type != N64Recomp::RelocType::R_MIPS_HI16 && prev_hi_count != 0) {
+                            // This is an invalid elf as the MIPS System V ABI documentation states:
+                            // "Each relocation type of R_MIPS_HI16 must have an associated R_MIPS_LO16 entry
+                            // immediately following it in the list of relocations."
+                            fmt::print(stderr, "Unpaired HI16 reloc index {} in section {} referencing symbol {} with offset 0x{:08X}\n",
+                                i - 1, section_out.name, section_out.relocs[i - 1].symbol_index, section_out.relocs[i - 1].address);
+                            return nullptr;
+                        }
+                        prev_lo = false;
+                    }
+
+                    if (reloc_out.type == N64Recomp::RelocType::R_MIPS_HI16) {
+                        uint32_t rel_immediate = reloc_rom_word & 0xFFFF;
+                        // First HI16, store its immediate.
+                        if (prev_hi_count == 0) {
+                            prev_hi_immediate = rel_immediate;
+                            prev_hi_symbol = rel_symbol;
+                        }
+                        // HI16 that follows another HI16, ensure they reference the same symbol.
+                        else {
+                            if (prev_hi_symbol != rel_symbol) {
+                                fmt::print(stderr, "HI16 reloc (index {} symbol {} offset 0x{:08X}) follows another HI16 reloc with a different symbol (index {} symbol {} offset 0x{:08X}) in section {}\n",
+                                    i, rel_symbol, section_out.relocs[i].address,
+                                    i - 1, prev_hi_symbol, section_out.relocs[i - 1].address,
+                                    section_out.name);
+                                return nullptr;
+                            }
+                        }
+                        // Populate the reloc temporarily, the full offset will be calculated upon pairing.
+                        reloc_out.target_section_offset = rel_immediate << 16;
+                        prev_hi_count++;
+                    } else {
+                        prev_hi_count = 0;
+                    }
+
+                    if (reloc_out.type == N64Recomp::RelocType::R_MIPS_32) {
+                        // The reloc addend is just the existing word before relocation, so the section offset can just be the symbol's section offset.
+                        // Incorporating the addend will be handled at load-time.
+                        reloc_out.target_section_offset = rel_symbol_offset;
+                        // TODO set section_out.has_mips32_relocs to true if this section should emit its mips32 relocs (mainly for TLB mapping).
+
+                        if (reloc_out.reference_symbol) {
+                            uint32_t reloc_target_section_addr = context.get_reference_section_vram(reloc_out.target_section);
+                            // Patch the word in the ROM to incorporate the symbol's value.
+                            uint32_t updated_reloc_word = reloc_rom_word + reloc_target_section_addr + reloc_out.target_section_offset;
+                            *reinterpret_cast<uint32_t*>(context.rom.data() + reloc_rom_addr) = byteswap(updated_reloc_word);
+                        }
+                    }
+
+                    if (reloc_out.type == N64Recomp::RelocType::R_MIPS_26) {
+                        uint32_t rel_immediate = (reloc_rom_word & 0x3FFFFFF) << 2;
+                        if (reloc_out.reference_symbol) {
+                            // Reference symbol relocs have their section offset already calculated, so don't apply the R_MIPS26 rule for the upper 4 bits.
+                            // TODO Find a way to unify this with the else case.
+                            reloc_out.target_section_offset = rel_immediate + rel_symbol_offset - rel_section_vram;
+                        }
+                        else {
+                            reloc_out.target_section_offset = rel_immediate + rel_symbol_offset + (section_out.ram_addr & 0xF0000000) - rel_section_vram;
+                        }
+                    }
+                }
+            }
+
+            // Sort this section's relocs by address, which allows for binary searching and more efficient iteration during recompilation.
+            // This is safe to do as the entire full_immediate in present in relocs due to the pairing that was done earlier, so the HI16 does not
+            // need to directly preceed the matching LO16 anymore.
+            std::sort(section_out.relocs.begin(), section_out.relocs.end(),
+                [](const N64Recomp::Reloc& a, const N64Recomp::Reloc& b) {
+                    return a.address < b.address;
+                }
+            );
+
+            // Patch the ROM word for HI16 and LO16 reference symbol relocs to non-relocatable sections.
+            for (size_t i = 0; i < section_out.relocs.size(); i++) {
+                auto& reloc = section_out.relocs[i];
+                if (reloc.reference_symbol && (reloc.type == N64Recomp::RelocType::R_MIPS_HI16 || reloc.type == N64Recomp::RelocType::R_MIPS_LO16)) {
+                    bool target_section_relocatable = context.is_reference_section_relocatable(reloc.target_section);
+                    if (!target_section_relocatable) {
+                        uint32_t reloc_rom_addr = reloc.address - section_out.ram_addr + section_out.rom_addr;
+                        uint32_t reloc_rom_word = byteswap(*reinterpret_cast<const uint32_t*>(context.rom.data() + reloc_rom_addr));
+
+                        uint32_t ref_section_vram = context.get_reference_section_vram(reloc.target_section);
+                        uint32_t full_immediate = reloc.target_section_offset + ref_section_vram;
+
+                        uint32_t imm;
+
+                        if (reloc.type == N64Recomp::RelocType::R_MIPS_HI16) {
+                            imm = (full_immediate >> 16) + ((full_immediate >> 15) & 1);
+                        }
+                        else {
+                            imm = full_immediate & 0xFFFF;
+                        }
+
+                        *reinterpret_cast<uint32_t*>(context.rom.data() + reloc_rom_addr) = byteswap(reloc_rom_word | imm);
+                        // Remove the reloc by setting it to a type of NONE.
+                        reloc.type = N64Recomp::RelocType::R_MIPS_NONE;
+                        reloc.reference_symbol = false;
+                        reloc.symbol_index = (uint32_t)-1;
+                    }
+                }
+            }
+        }
+    }
+
+    return symtab_section;
+}
+
+static void setup_context_for_elf(N64Recomp::Context& context, const ELFIO::elfio& elf_file) {
+    context.sections.resize(elf_file.sections.size());
+    context.section_functions.resize(elf_file.sections.size());
+    context.functions.reserve(1024);
+    context.functions_by_vram.reserve(context.functions.capacity());
+    context.functions_by_name.reserve(context.functions.capacity());
+    context.rom.reserve(8 * 1024 * 1024);
+}
+
+bool N64Recomp::Context::from_elf_file(const std::filesystem::path& elf_file_path, Context& out, const ElfParsingConfig& elf_config, bool for_dumping_context, DataSymbolMap& data_syms_out, bool& found_entrypoint_out) {
+    ELFIO::elfio elf_file;
+
+    if (!elf_file.load(elf_file_path.string())) {
+        fmt::print("Elf file not found\n");
+        return false;
+    }
+
+    if (elf_file.get_class() != ELFIO::ELFCLASS32) {
+        fmt::print("Incorrect elf class\n");
+        return false;
+    }
+
+    if (elf_file.get_encoding() != ELFIO::ELFDATA2MSB) {
+        fmt::print("Incorrect elf endianness\n");
+        return false;
+    }
+
+    setup_context_for_elf(out, elf_file);
+
+    // Read all of the sections in the elf and look for the symbol table section
+    ELFIO::section* mdebug_section = nullptr;
+    ELFIO::section* symtab_section = read_sections(out, mdebug_section, elf_config, elf_file);
+
+    // If no symbol table was found then exit
+    if (symtab_section == nullptr) {
+        return false;
+    }
+
+    // Read all of the symbols in the elf and look for the entrypoint function
+    found_entrypoint_out = read_symbols(out, elf_file, symtab_section, elf_config, for_dumping_context, data_syms_out);
+
+    // Process an mdebug section for static symbols. The presence of an mdebug section in the input is optional.
+    if (elf_config.use_mdebug) {
+        if (mdebug_section == nullptr) {
+            fmt::print("\"use_mdebug\" set to true in config, but no mdebug section is present in the elf!\n");
+            return false;
+        }
+        if (!N64Recomp::MDebug::parse_mdebug(elf_config, mdebug_section->get_data(), static_cast<uint32_t>(mdebug_section->get_offset()), out, data_syms_out)) {
+            fmt::print("Failed to parse mdebug section\n");
+            return false;
+        }
+    }
+
+    return true;
+}

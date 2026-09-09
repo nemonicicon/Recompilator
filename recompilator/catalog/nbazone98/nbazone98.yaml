@@ -1,0 +1,78 @@
+name: NBA in the Zone 98 (USA)
+sha1: a306d80f483f8bb5891a543919c53fac61d9348f
+options:
+  basename: nbazone98
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/nbazone98.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x10AC, asm, main_800004AC]
+      - [0xD3394, asm, main_800D2794]
+      - [0xD3760, asm, main_800D2B60]
+      - [0xE96B8, asm, main_800E8AB8]
+      - [0xE9748, asm, main_800E8B48]
+      - [0xE97F8, asm, main_800E8BF8]
+      - [0xE99F8, data, main_800E8DF8]
+      - [0xE9D80, asm, main_800E9180]
+      - [0xE9E0C, asm, main_800E920C]
+      - [0xE9E28, asm, main_800E9228]
+      - [0xE9EA8, asm, main_800E92A8]
+      - [0xE9EB4, data, main_800E92B4]
+      - [0xE9FC0, asm, main_800E93C0]
+      - [0xEA15C, data, main_800E955C]
+      - [0xEA1E0, asm, main_800E95E0]
+      - [0xEA26C, data, main_800E966C]
+      - [0xEA3AC, asm, main_800E97AC]
+      - [0xEA3B0, data, main_800E97B0]
+      - [0xEA52C, asm, main_800E992C]
+      - [0xEA540, data, main_800E9940]
+      - [0xF2E70, data, main_800F2270]
+      - [0xF33F0, data, main_800F27F0]
+      - [0xF3AC0, asm, main_800F2EC0]
+      - [0xF3B3C, data, main_800F2F3C]
+      - [0xF481C, asm, main_800F3C1C]
+      - [0xF4830, data, main_800F3C30]
+      - [0xF5258, data, main_800F4658]
+      - [0xF567C, asm, main_800F4A7C]
+      - [0xF56F8, data, main_800F4AF8]
+      - [0xF7538, asm, main_800F6938]
+      - [0xF75E4, data, main_800F69E4]
+      - [0xF9288, asm, main_800F8688]
+      - [0xF9B48, data, main_800F8F48]
+      - [0xFA218, asm, main_800F9618]
+      - [0xFA220, data, main_800F9620]
+      - [0xFD1C4, asm, main_800FC5C4]
+      - [0xFD1CC, data, main_800FC5CC]
+      - [0x100208, asm, main_800FF608]
+      - [0x10030C, data, main_800FF70C]
+      - [0x100D04, asm, main_80100104]
+      - [0x100D10, data, main_80100110]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

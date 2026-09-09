@@ -1,0 +1,3 @@
+# cleared 2026-08-06: the July + regen stubs were all data-as-code fiction inside the
+# compressed payload (0x80001300..), which is now honestly typed bin. Nothing to stub
+# in the real bootloader.

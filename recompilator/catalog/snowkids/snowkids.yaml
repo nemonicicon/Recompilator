@@ -1,0 +1,167 @@
+name: Snowboard Kids (USA)
+sha1: 1583bacc9046a360df8ea4d536942155247e154c
+options:
+  basename: snowkids
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/snowkids.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0xA7614, asm, main_800A6A14]
+      - [0xA7B80, asm, main_800A6F80]
+      - [0xB7D9C, asm, main_800B719C]
+      - [0xB8500, asm, main_800B7900]
+      - [0xBB170, bin, main_800BA570]
+      - [0xBB64C, asm, main_800BAA4C]
+      - [0xBC164, bin, main_800BB564]
+      - [0xBC464, asm, main_800BB864]
+      - [0xBC4DC, bin, main_800BB8DC]
+      - [0xBCF44, bin, main_800BC344]
+      - [0xD641C, asm, main_800D581C]
+      - [0xD661C, bin, main_800D5A1C]
+      - [0xD6F2C, asm, main_800D632C]
+      - [0xD6F6C, asm, main_800D636C]
+      - [0xD7584, asm, main_800D6984]
+      - [0xD75C4, bin, main_800D69C4]
+      - [0xD7844, asm, main_800D6C44]
+      - [0xD78BC, bin, main_800D6CBC]
+      - [0xD828C, bin, main_800D768C]
+      - [0xD82B4, asm, main_800D76B4]
+      - [0xD82C8, bin, main_800D76C8]
+      - [0xD862C, bin, main_800D7A2C]
+      - [0xD9F04, asm, main_800D9304]
+      - [0xDA014, asm, main_800D9414]
+      - [0xDA148, asm, main_800D9548]
+      - [0xDA15C, bin, main_800D955C]
+      - [0xDA46C, asm, main_800D986C]
+      - [0xDA48C, bin, main_800D988C]
+      - [0xDABB8, bin, main_800D9FB8]
+      - [0xDAF14, bin, main_800DA314]
+      - [0xDAFA4, asm, main_800DA3A4]
+      - [0xDAFB8, bin, main_800DA3B8]
+      - [0xDB044, asm, main_800DA444]
+      - [0xDB06C, bin, main_800DA46C]
+      - [0xDB374, bin, main_800DA774]
+      - [0xE19D0, bin, main_800E0DD0]
+      - [0xE1A94, asm, main_800E0E94]
+      - [0xE2CC4, asm, main_800E20C4]
+      - [0xE3600, bin, main_800E2A00]
+      - [0xE4250, asm, main_800E3650]
+      - [0xE4304, bin, main_800E3704]
+      - [0xE6FC8, bin, main_800E63C8]
+      - [0xE96F0, asm, main_800E8AF0]
+      - [0xE9C60, bin, main_800E9060]
+      - [0xEBD80, asm, main_800EB180]
+      - [0xEBDA0, bin, main_800EB1A0]
+      - [0xEC480, asm, main_800EB880]
+      - [0xED4F0, asm, main_800EC8F0]
+      - [0xED5E0, asm, main_800EC9E0]
+      - [0xED600, asm, main_800ECA00]
+      - [0xED620, asm, main_800ECA20]
+      - [0xED650, asm, main_800ECA50]
+      - [0xED868, asm, main_800ECC68]
+      - [0xEE694, bin, main_800EDA94]
+      - [0xEE718, asm, main_800EDB18]
+      - [0xEED38, bin, main_800EE138]
+      - [0xEEEF8, asm, main_800EE2F8]
+      - [0xEF00C, bin, main_800EE40C]
+      - [0xEF314, asm, main_800EE714]
+      - [0xEF430, bin, main_800EE830]
+      - [0xEF758, asm, main_800EEB58]
+      - [0xEFF50, bin, main_800EF350]
+      - [0xF04F8, asm, main_800EF8F8]
+      - [0xF0540, bin, main_800EF940]
+      - [0xF08C0, asm, main_800EFCC0]
+      - [0xF09C0, bin, main_800EFDC0]
+      - [0xF0AE0, asm, main_800EFEE0]
+      - [0xF1618, bin, main_800F0A18]
+      - [0xF168C, asm, main_800F0A8C]
+      - [0xF1A30, bin, main_800F0E30]
+      - [0xF1C90, asm, main_800F1090]
+      - [0xF1ED8, bin, main_800F12D8]
+      - [0xF2158, asm, main_800F1558]
+      - [0xF25E8, bin, main_800F19E8]
+      - [0xF2948, asm, main_800F1D48]
+      - [0xF2A18, bin, main_800F1E18]
+      - [0xF3100, asm, main_800F2500]
+      - [0xF3228, bin, main_800F2628]
+      - [0xF33D8, asm, main_800F27D8]
+      - [0xF33F0, bin, main_800F27F0]
+      - [0xF3688, asm, main_800F2A88]
+      - [0xF38C8, bin, main_800F2CC8]
+      - [0xF3BC0, asm, main_800F2FC0]
+      - [0xF3E18, bin, main_800F3218]
+      - [0xF3F14, asm, main_800F3314]
+      - [0xF40D0, bin, main_800F34D0]
+      - [0xF4200, asm, main_800F3600]
+      - [0xF45E8, bin, main_800F39E8]
+      - [0xF4890, asm, main_800F3C90]
+      - [0xF4C18, asm, main_800F4018]
+      - [0xF5210, asm, main_800F4610]
+      - [0xF5468, bin, main_800F4868]
+      - [0xF54C0, asm, main_800F48C0]
+      - [0xF5558, bin, main_800F4958]
+      - [0xF56E8, asm, main_800F4AE8]
+      - [0xF6370, bin, main_800F5770]
+      - [0xF6470, asm, main_800F5870]
+      - [0xF6480, bin, main_800F5880]
+      - [0xF6498, asm, main_800F5898]
+      - [0xF64D8, bin, main_800F58D8]
+      - [0xF6700, asm, main_800F5B00]
+      - [0xF6CA8, bin, main_800F60A8]
+      - [0xF71E4, asm, main_800F65E4]
+      - [0xF7214, bin, main_800F6614]
+      - [0xF7E88, asm, main_800F7288]
+      - [0xF8078, bin, main_800F7478]
+      - [0xF89D0, asm, main_800F7DD0]
+      - [0xF8B90, bin, main_800F7F90]
+      - [0xF9090, asm, main_800F8490]
+      - [0xF9388, bin, main_800F8788]
+      - [0xF9628, asm, main_800F8A28]
+      - [0xF98F8, bin, main_800F8CF8]
+      - [0xF9DD8, asm, main_800F91D8]
+      - [0xF9E20, bin, main_800F9220]
+      - [0xF9F70, asm, main_800F9370]
+      - [0xFA0B4, bin, main_800F94B4]
+      - [0xFC5B0, asm, main_800FB9B0]
+      - [0xFC5C8, bin, main_800FB9C8]
+      - [0xFC838, asm, main_800FBC38]
+      - [0xFCA68, bin, main_800FBE68]
+      - [0xFD048, asm, main_800FC448]
+      - [0xFD288, bin, main_800FC688]
+      - [0xFDA18, asm, main_800FCE18]
+      - [0xFE410, bin, main_800FD810]
+      - [0xFE468, asm, main_800FD868]
+      - [0xFE878, bin, main_800FDC78]
+      - [0xFEE10, asm, main_800FE210]
+      - [0xFEE28, bin, main_800FE228]
+      - [0xFFA10, asm, main_800FEE10]
+      - [0xFFA50, bin, main_800FEE50]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

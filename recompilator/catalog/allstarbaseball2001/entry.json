@@ -1,0 +1,55 @@
+{
+  "game": "allstarbaseball2001",
+  "rom": {
+    "sha1": "4f1b8635322190bb3d0c6fc7d3ba844941f05574",
+    "xxh3_64": "0x7119723EF4C0246E",
+    "entrypoint": "0x80300000"
+  },
+  "sweep": {
+    "title": "All-Star Baseball 2001",
+    "release": "2000-02-29",
+    "sweep": "—"
+  },
+  "dependencies": {},
+  "engine": {
+    "rt64": "b6b08ea",
+    "runtime": "94f9cf1",
+    "N64Recomp": "b745335"
+  },
+  "files": [
+    "_force_code.txt",
+    "_force_code_ranges.txt",
+    "_force_data.txt",
+    "_force_ignore.txt",
+    "_subsegs.txt",
+    "allstarbaseball2001.toml",
+    "allstarbaseball2001.yaml",
+    "allstarbaseball2001_overlays.txt",
+    "allstarbaseball2001_pinned.ld",
+    "allstarbaseball2001_stubs.txt",
+    "app/CMakeLists.txt",
+    "app/CMakePresets.json",
+    "app/src/audio.cpp",
+    "app/src/input.cpp",
+    "app/src/main.cpp",
+    "app/src/patches/engine_shims.c",
+    "app/src/patches/math_patches.c",
+    "app/src/patches/os_stubs.c",
+    "app/src/rsp.cpp",
+    "app/src/rt64_renderer.cpp",
+    "app/src/rt64_renderer.hpp",
+    "include/macro.inc",
+    "symbol_addrs.txt",
+    "undefined_syms_manual.ld"
+  ],
+  "never_shipped": [
+    "the ROM",
+    "asm/",
+    "assets/",
+    "build/ (the ELF)",
+    "RecompiledFuncs/ (emitted C)",
+    "ni_section_data.c (generated locally by tools/gen_ni_data.py)",
+    "captures, logs, backups"
+  ],
+  "exported_by": "recompilator/tools/export_catalog_entry.py"
+}

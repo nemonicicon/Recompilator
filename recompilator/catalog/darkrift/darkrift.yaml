@@ -1,0 +1,150 @@
+name: Dark Rift (USA)
+sha1: 3254442626ca2f2ac74400dc1c6a306f5d1b6ceb
+options:
+  basename: darkrift
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/darkrift.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x10AC, asm, main_800004AC]
+      - [0x1EBE4, asm, main_8001DFE4]
+      - [0x20DC4, asm, main_800201C4]
+      - [0x212B0, asm, main_800206B0]
+      - [0x21DB0, asm, main_800211B0]
+      - [0x223A0, asm, main_800217A0]
+      - [0x23028, asm, main_80022428]
+      - [0x23294, asm, main_80022694]
+      - [0x247E4, asm, main_80023BE4]
+      - [0x24E14, asm, main_80024214]
+      - [0x255B0, asm, main_800249B0]
+      - [0x27C54, asm, main_80027054]
+      - [0x28D20, asm, main_80028120]
+      - [0x2916C, asm, main_8002856C]
+      - [0x29A84, asm, main_80028E84]
+      - [0x29BCC, asm, main_80028FCC]
+      - [0x2B490, asm, main_8002A890]
+      - [0x2D728, asm, main_8002CB28]
+      - [0x2DDA8, asm, main_8002D1A8]
+      - [0x2EBCC, asm, main_8002DFCC]
+      - [0x30678, asm, main_8002FA78]
+      - [0x30C70, asm, main_80030070]
+      - [0x31508, asm, main_80030908]
+      - [0x317B0, asm, main_80030BB0]
+      - [0x31CC8, asm, main_800310C8]
+      - [0x3294C, asm, main_80031D4C]
+      - [0x32A4C, asm, main_80031E4C]
+      - [0x32DC0, asm, main_800321C0]
+      - [0x338EC, asm, main_80032CEC]
+      - [0x33FF4, asm, main_800333F4]
+      - [0x34BB0, asm, main_80033FB0]
+      - [0x34FEC, asm, main_800343EC]
+      - [0x355F0, asm, main_800349F0]
+      - [0x35B34, asm, main_80034F34]
+      - [0x36D94, asm, main_80036194]
+      - [0x38A28, asm, main_80037E28]
+      - [0x39A00, asm, main_80038E00]
+      - [0x3A10C, asm, main_8003950C]
+      - [0x3AD50, asm, main_8003A150]
+      - [0x3B2F0, asm, main_8003A6F0]
+      - [0x3B7D0, asm, main_8003ABD0]
+      - [0x3C1A0, asm, main_8003B5A0]
+      - [0x3C460, asm, main_8003B860]
+      - [0x3C4E0, asm, main_8003B8E0]
+      - [0x3C810, asm, main_8003BC10]
+      - [0x3DE90, asm, main_8003D290]
+      - [0x3E764, asm, main_8003DB64]
+      - [0x3EC58, asm, main_8003E058]
+      - [0x3F9EC, asm, main_8003EDEC]
+      - [0x3FC80, asm, main_8003F080]
+      - [0x404C0, asm, main_8003F8C0]
+      - [0x407B0, asm, main_8003FBB0]
+      - [0x40E50, asm, main_80040250]
+      - [0x411D0, asm, main_800405D0]
+      - [0x412B0, asm, main_800406B0]
+      - [0x41710, asm, main_80040B10]
+      - [0x41BC0, asm, main_80040FC0]
+      - [0x42030, asm, main_80041430]
+      - [0x427C0, asm, main_80041BC0]
+      - [0x430D0, asm, main_800424D0]
+      - [0x43A80, asm, main_80042E80]
+      - [0x43DB4, asm, main_800431B4]
+      - [0x4457C, asm, main_8004397C]
+      - [0x448F8, asm, main_80043CF8]
+      - [0x45530, asm, main_80044930]
+      - [0x45640, asm, main_80044A40]
+      - [0x457E0, asm, main_80044BE0]
+      - [0x46360, asm, main_80045760]
+      - [0x46CC0, asm, main_800460C0]
+      - [0x47020, asm, main_80046420]
+      - [0x50590, asm, main_8004F990]
+      - [0x52554, asm, main_80051954]
+      - [0x53064, asm, main_80052464]
+      - [0x53CF8, asm, main_800530F8]
+      - [0x56CA0, bin, main_800560A0]
+      - [0x576F0, asm, main_80056AF0]
+      - [0x59420, bin, main_80058820]
+      - [0x59CDC, bin, main_800590DC]
+      - [0x5D854, bin, main_8005CC54]
+      - [0x63944, asm, main_80062D44]
+      - [0x6394C, bin, main_80062D4C]
+      - [0x6EDCC, bin, main_8006E1CC]
+      - [0x81C28, bin, main_80081028]
+      - [0x81F60, bin, main_80081360]
+      - [0x8294C, asm, main_80081D4C]
+      - [0x82974, bin, main_80081D74]
+      - [0xA5208, asm, main_800A4608]
+      - [0xA57E8, bin, main_800A4BE8]
+      - [0xAB5CC, bin, main_800AA9CC]
+      - [0xAC7CC, asm, main_800ABBCC]
+      - [0xAC7E4, bin, main_800ABBE4]
+      - [0xAD2CC, asm, main_800AC6CC]
+      - [0xADB44, bin, main_800ACF44]
+      - [0xAF200, bin, main_800AE600]
+      - [0xB0530, bin, main_800AF930]
+      - [0xB1794, asm, main_800B0B94]
+      - [0xB1898, asm, main_800B0C98]
+      - [0xB1BE0, bin, main_800B0FE0]
+      - [0xB3188, bin, main_800B2588]
+      - [0xB3F9C, bin, main_800B339C]
+      - [0xB58E0, bin, main_800B4CE0]
+      - [0xB5D78, bin, main_800B5178]
+      - [0xB77F0, bin, main_800B6BF0]
+      - [0xB85E0, bin, main_800B79E0]
+      - [0xBD75C, bin, main_800BCB5C]
+      - [0xC2DE8, asm, main_800C21E8]
+      - [0xC2E94, bin, main_800C2294]
+      - [0xCC070, asm, main_800CB470]
+      - [0xCC090, bin, main_800CB490]
+      - [0xDD804, asm, main_800DCC04]
+      - [0xDD864, bin, main_800DCC64]
+      - [0xE725C, asm, main_800E665C]
+      - [0xE72A0, bin, main_800E66A0]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

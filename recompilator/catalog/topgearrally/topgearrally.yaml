@@ -1,0 +1,87 @@
+name: Top Gear Rally (USA)
+sha1: bfc51f086ebdb78904dc24ad0c3a2d946e26d022
+options:
+  basename: topgearrally
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/topgearrally.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80200000
+    subsegments:
+      - [0x1000, asm, main_80200000]
+      - [0x9570, asm, main_80208570]
+      - [0xAD70, asm, main_80209D70]
+      - [0x11F80, asm, main_80210F80]
+      - [0x12150, asm, main_80211150]
+      - [0x12840, asm, main_80211840]
+      - [0x15A3C, asm, main_80214A3C]
+      - [0x182D0, asm, main_802172D0]
+      - [0x1CE28, asm, main_8021BE28]
+      - [0x1F620, asm, main_8021E620]
+      - [0x27D9C, asm, main_80226D9C]
+      - [0x298D4, asm, main_802288D4]
+      - [0x2A550, asm, main_80229550]
+      - [0x35FF8, asm, main_80234FF8]
+      - [0x42314, asm, main_80241314]
+      - [0x43890, asm, main_80242890]
+      - [0x45BA8, asm, main_80244BA8]
+      - [0x57270, asm, main_80256270]
+      - [0x59070, asm, main_80258070]
+      - [0x67760, asm, main_80266760]
+      - [0x6C204, asm, main_8026B204]
+      - [0x6C5D0, asm, main_8026B5D0]
+      - [0x6D760, asm, main_8026C760]
+      - [0x6DE20, asm, main_8026CE20]
+      - [0x81BD4, asm, main_80280BD4]
+      - [0x9606C, bin, main_8029506C]
+      - [0xA209C, bin, main_802A109C]
+      - [0xA26F0, asm, main_802A16F0]
+      - [0xA5670, asm, main_802A4670]
+      - [0xA66EC, bin, main_802A56EC]
+      - [0xA69C8, bin, main_802A59C8]
+      - [0xA6E50, asm, main_802A5E50]
+      - [0xA71E8, asm, main_802A61E8]
+      - [0xA74F8, bin, main_802A64F8]
+      - [0xA86D4, asm, main_802A76D4]
+      - [0xA8BEC, asm, main_802A7BEC]
+      - [0xAA164, asm, main_802A9164]
+      - [0xAB6FC, asm, main_802AA6FC]
+      - [0xACCF4, asm, main_802ABCF4]
+      - [0xACDC8, bin, main_802ABDC8]
+      - [0xAD294, asm, main_802AC294]
+      - [0xAD440, bin, main_802AC440]
+      - [0xC1990, asm, main_802C0990]
+      - [0xC1A5C, bin, main_802C0A5C]
+      - [0xC3D60, asm, main_802C2D60]
+      - [0xC3D88, bin, main_802C2D88]
+      - [0xCE498, asm, main_802CD498]
+      - [0xCE4B8, bin, main_802CD4B8]
+      - [0xDF300, asm, main_802DE300]
+      - [0xDF33C, bin, main_802DE33C]
+      - [0xFAE24, bin, main_802F9E24]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]

@@ -1,0 +1,98 @@
+name: Roadsters (USA)
+sha1: d896ffcba44696bdb7e2048841f287ea5951ad2a
+options:
+  basename: roadsters
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/roadsters.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x10E8, asm, main_800004E8]
+      - [0x50174, asm, main_8004F574]
+      - [0x50540, asm, main_8004F940]
+      - [0x63054, asm, main_80062454]
+      - [0x68E50, data, main_80068250]
+      - [0x69968, asm, main_80068D68]
+      - [0x699F8, data, main_80068DF8]
+      - [0x69BF0, asm, main_80068FF0]
+      - [0x69DB8, asm, main_800691B8]
+      - [0x69DD8, asm, main_800691D8]
+      - [0x69E78, data, main_80069278]
+      - [0x6A100, data, main_80069500]
+      - [0x6EC14, asm, main_8006E014]
+      - [0x6EE98, data, main_8006E298]
+      - [0x76C6C, asm, main_8007606C]
+      - [0x76DA8, data, main_800761A8]
+      - [0x791E4, asm, main_800785E4]
+      - [0x79320, data, main_80078720]
+      - [0x80C38, asm, main_80080038]
+      - [0x84038, data, main_80083438]
+      - [0x927C4, data, main_80091BC4]
+      - [0x9D298, asm, main_8009C698]
+      - [0x9D50C, data, main_8009C90C]
+      - [0x9D574, asm, main_8009C974]
+      - [0x9D5DC, data, main_8009C9DC]
+      - [0x9D6AC, asm, main_8009CAAC]
+      - [0x9D714, data, main_8009CB14]
+      - [0x9D77C, asm, main_8009CB7C]
+      - [0x9D7E4, data, main_8009CBE4]
+      - [0x9D84C, asm, main_8009CC4C]
+      - [0x9DCC4, data, main_8009D0C4]
+      - [0x9DD2C, asm, main_8009D12C]
+      - [0x9DD94, data, main_8009D194]
+      - [0x9DDFC, asm, main_8009D1FC]
+      - [0x9E564, data, main_8009D964]
+      - [0xA300C, asm, main_800A240C]
+      - [0xA306C, data, main_800A246C]
+      - [0xA33E8, asm, main_800A27E8]
+      - [0xA3988, data, main_800A2D88]
+      - [0xA39D4, asm, main_800A2DD4]
+      - [0xA5264, data, main_800A4664]
+      - [0xA5350, asm, main_800A4750]
+      - [0xA5430, data, main_800A4830]
+      - [0xA5B8C, asm, main_800A4F8C]
+      - [0xA6090, data, main_800A5490]
+      - [0xA67E0, asm, main_800A5BE0]
+      - [0xA6AAC, data, main_800A5EAC]
+      - [0xA85F8, asm, main_800A79F8]
+      - [0xA8624, data, main_800A7A24]
+      - [0xA9AE4, asm, main_800A8EE4]
+      - [0xA9AEC, data, main_800A8EEC]
+      - [0xB00A4, asm, main_800AF4A4]
+      - [0xC1000, asm, main_800C0400]
+      - [0xD5D10, data, main_800D5110]
+      - [0xE1FCC, asm, main_800E13CC]
+      - [0xE2B34, data, main_800E1F34]
+      - [0xE3CF0, asm, main_800E30F0]
+      - [0xE4340, data, main_800E3740]
+      - [0xE51A8, asm, main_800E45A8]
+      - [0xE633C, data, main_800E573C]
+      - [0x100C5C, asm, main_8010005C]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

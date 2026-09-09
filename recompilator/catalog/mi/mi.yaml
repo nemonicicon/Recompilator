@@ -1,0 +1,105 @@
+name: Mission Impossible (USA)
+sha1: 7546d5df1fc93fed8205a066f1333fd7dd50c1e1
+options:
+  basename: mi
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/mi.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x7AE24, asm, main_8007A224]
+      - [0x7B200, asm, main_8007A600]
+      - [0x80AB0, asm, main_8007FEB0]
+      - [0x85B84, bin, main_80084F84]
+      - [0x89A08, asm, main_80088E08]
+      - [0x8ACD8, asm, main_8008A0D8]
+      - [0x8ADC4, bin, main_8008A1C4]
+      - [0x8B038, bin, main_8008A438]
+      - [0x8BAEC, asm, main_8008AEEC]
+      - [0x8BF00, bin, main_8008B300]
+      - [0x8CB74, asm, main_8008BF74]
+      - [0x8D4B4, asm, main_8008C8B4]
+      - [0x8DCA0, bin, main_8008D0A0]
+      - [0x8E744, asm, main_8008DB44]
+      - [0x8EB40, bin, main_8008DF40]
+      - [0x8FAB0, bin, main_8008EEB0]
+      - [0x90650, bin, main_8008FA50]
+      - [0x909A4, asm, main_8008FDA4]
+      - [0x90F44, asm, main_80090344]
+      - [0x9116C, asm, main_8009056C]
+      - [0x91868, asm, main_80090C68]
+      - [0x91A20, bin, main_80090E20]
+      - [0x92124, asm, main_80091524]
+      - [0x92670, bin, main_80091A70]
+      - [0x926EC, bin, main_80091AEC]
+      - [0x93BB4, asm, main_80092FB4]
+      - [0x94EB4, bin, main_800942B4]
+      - [0x9683C, bin, main_80095C3C]
+      - [0x98068, bin, main_80097468]
+      - [0x9E3C0, asm, main_8009D7C0]
+      - [0x9F228, bin, main_8009E628]
+      - [0xA00E0, bin, main_8009F4E0]
+      - [0xA2358, bin, main_800A1758]
+      - [0xA2F7C, bin, main_800A237C]
+      - [0xA3D48, asm, main_800A3148]
+      - [0xA52C8, bin, main_800A46C8]
+      - [0xA6284, bin, main_800A5684]
+      - [0xA724C, bin, main_800A664C]
+      - [0xA8838, bin, main_800A7C38]
+      - [0xA8958, bin, main_800A7D58]
+      - [0xA99F0, bin, main_800A8DF0]
+      - [0xA9B58, bin, main_800A8F58]
+      - [0xA9DEC, asm, main_800A91EC]
+      - [0xA9E74, asm, main_800A9274]
+      - [0xAA238, asm, main_800A9638]
+      - [0xAA414, bin, main_800A9814]
+      - [0xAA548, bin, main_800A9948]
+      - [0xBA62C, bin, main_800B9A2C]
+      - [0xBB7B0, asm, main_800BABB0]
+      - [0xBC2EC, bin, main_800BB6EC]
+      - [0xBDAE0, asm, main_800BCEE0]
+      - [0xBDAFC, bin, main_800BCEFC]
+      - [0xC383C, asm, main_800C2C3C]
+      - [0xC3854, bin, main_800C2C54]
+      - [0xC52DC, asm, main_800C46DC]
+      - [0xC5308, bin, main_800C4708]
+      - [0xD6F9C, asm, main_800D639C]
+      - [0xD6FC4, bin, main_800D63C4]
+      - [0xDEE78, asm, main_800DE278]
+      - [0xDEE80, bin, main_800DE280]
+      - [0xE4048, asm, main_800E3448]
+      - [0xE4064, bin, main_800E3464]
+      - [0xF4110, asm, main_800F3510]
+      - [0xF4118, bin, main_800F3518]
+      - [0xF5C38, asm, main_800F5038]
+      - [0xF5C50, bin, main_800F5050]
+      - [0xFC7C4, asm, main_800FBBC4]
+      - [0xFC7D0, bin, main_800FBBD0]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

@@ -1,0 +1,81 @@
+name: Jeremy McGrath Supercross 2000 (USA)
+sha1: 278ad55333b7b75970812ecb9e691111ca3cfc46
+options:
+  basename: jeremymcgrathsuper
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/jeremymcgrathsuper.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80300000
+    subsegments:
+      - [0x1000, asm, main_80300000]
+      - [0x11B8, asm, main_803001B8]
+      - [0x1360, asm, main_80300360]
+      - [0x1EEC, asm, main_80300EEC]
+      - [0x2790, asm, main_80301790]
+      - [0x4FD4, bin, main_80303FD4]
+      - [0x5014, bin, main_80304014]
+      - [0x52D0, bin, main_803042D0]
+      - [0x5D8C, asm, main_80304D8C]
+      - [0x5ED4, bin, main_80304ED4]
+      - [0x5FCC, asm, main_80304FCC]
+      - [0x601C, bin, main_8030501C]
+      - [0x627C, asm, main_8030527C]
+      - [0x670C, bin, main_8030570C]
+      - [0x6CE8, asm, main_80305CE8]
+      - [0x6F30, bin, main_80305F30]
+      - [0x7480, asm, main_80306480]
+      - [0x75BC, asm, main_803065BC]
+      - [0x7730, bin, main_80306730]
+      - [0x7EA8, asm, main_80306EA8]
+      - [0xB910, bin, main_8030A910]
+      - [0x14278, asm, main_80313278]
+      - [0x1431C, bin, main_8031331C]
+      - [0x243C8, asm, main_803233C8]
+      - [0x243F4, bin, main_803233F4]
+      - [0x2920C, asm, main_8032820C]
+      - [0x292A0, bin, main_803282A0]
+      - [0x2ED0C, asm, main_8032DD0C]
+      - [0x2ED54, bin, main_8032DD54]
+      - [0x43C34, asm, main_80342C34]
+      - [0x43C50, bin, main_80342C50]
+      - [0x497A0, asm, main_803487A0]
+      - [0x497D8, bin, main_803487D8]
+      - [0x55320, asm, main_80354320]
+      - [0x55328, bin, main_80354328]
+      - [0x73A8C, asm, main_80372A8C]
+      - [0x73A9C, bin, main_80372A9C]
+      - [0x75A70, asm, main_80374A70]
+      - [0x75B3C, bin, main_80374B3C]
+      - [0x89248, asm, main_80388248]
+      - [0x8925C, bin, main_8038825C]
+      - [0x8A430, asm, main_80389430]
+      - [0x8A450, bin, main_80389450]
+      - [0xEA66C, asm, main_803E966C]
+      - [0xEA6EC, bin, main_803E96EC]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

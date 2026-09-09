@@ -1,0 +1,107 @@
+name: Beetle Adventure Racing (USA)
+sha1: e5ab4d226c08d22f68a2edcc48870203e67454b8
+options:
+  basename: beetle
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/beetle.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x4EFC, asm, main_800042FC]
+      - [0x5E20, asm, main_80005220]
+      - [0x5F04, asm, main_80005304]
+      - [0x6288, asm, main_80005688]
+      - [0x62E0, asm, main_800056E0]
+      - [0x6354, asm, main_80005754]
+      - [0x63A8, asm, main_800057A8]
+      - [0x650C, asm, main_8000590C]
+      - [0x65E8, asm, main_800059E8]
+      - [0x66C4, asm, main_80005AC4]
+      - [0x6744, asm, main_80005B44]
+      - [0x681C, asm, main_80005C1C]
+      - [0x683C, asm, main_80005C3C]
+      - [0x697C, asm, main_80005D7C]
+      - [0x6ABC, asm, main_80005EBC]
+      - [0x6B48, asm, main_80005F48]
+      - [0x6D70, asm, main_80006170]
+      - [0x6DFC, asm, main_800061FC]
+      - [0x6E6C, asm, main_8000626C]
+      - [0x6F30, asm, main_80006330]
+      - [0x7204, asm, main_80006604]
+      - [0x7290, asm, main_80006690]
+      - [0x74A8, asm, main_800068A8]
+      - [0x7554, asm, main_80006954]
+      - [0x76D0, asm, main_80006AD0]
+      - [0x7830, asm, main_80006C30]
+      - [0x7C54, asm, main_80007054]
+      - [0x7FBC, asm, main_800073BC]
+      - [0x817C, asm, main_8000757C]
+      - [0x8340, asm, main_80007740]
+      - [0x8858, asm, main_80007C58]
+      - [0x8FE0, asm, main_800083E0]
+      - [0x91F8, asm, main_800085F8]
+      - [0x9458, asm, main_80008858]
+      - [0x9500, asm, main_80008900]
+      - [0x99C8, asm, main_80008DC8]
+      - [0x9D30, asm, main_80009130]
+      - [0x9F14, asm, main_80009314]
+      - [0xA29C, asm, main_8000969C]
+      - [0xA6D4, asm, main_80009AD4]
+      - [0xA880, asm, main_80009C80]
+      - [0xB1F0, asm, main_8000A5F0]
+      - [0xD3DC, asm, main_8000C7DC]
+      - [0xEFA0, asm, main_8000E3A0]
+      - [0xF2E0, asm, main_8000E6E0]
+      - [0xFD70, asm, main_8000F170]
+      - [0xFE94, asm, main_8000F294]
+      - [0x10134, asm, main_8000F534]
+      - [0x10294, asm, main_8000F694]
+      - [0x10BF4, asm, main_8000FFF4]
+      - [0x115F0, asm, main_800109F0]
+      - [0x11DB8, asm, main_800111B8]
+      - [0x130A0, asm, main_800124A0]
+      - [0x131B0, asm, main_800125B0]
+      - [0x13270, asm, main_80012670]
+      - [0x14950, asm, main_80013D50]
+      - [0x15D10, asm, main_80015110]
+      - [0x18B84, asm, main_80017F84]
+      - [0x18EE0, asm, main_800182E0]
+      - [0x19730, asm, main_80018B30]
+      - [0x199F0, asm, main_80018DF0]
+      - [0x1A850, bin, main_80019C50]
+      - [0x1AE44, asm, main_8001A244]
+      - [0x1E2BC, bin, main_8001D6BC]
+      - [0x231F0, bin, main_800225F0]
+      - [0x23600, bin, main_80022A00]
+      - [0x23A98, bin, main_80022E98]
+      - [0x3C148, bin, main_8003B548]
+      - [0x42EAC, bin, main_800422AC]
+      - [0x432BC, bin, main_800426BC]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x1000000]

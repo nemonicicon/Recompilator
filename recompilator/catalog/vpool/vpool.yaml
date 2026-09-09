@@ -1,0 +1,48 @@
+name: Virtual Pool 64 (USA)
+sha1: 4fed63f7ee35f4d3941f0d61175057481d91d2e0
+options:
+  basename: vpool
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/vpool.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x1F44, asm, main_80001344]
+      - [0x2320, asm, main_80001720]
+      - [0xC100C, asm, main_800C040C]
+      - [0xCC850, bin, main_800CBC50]
+      - [0xCD4A0, asm, main_800CC8A0]
+      - [0xCD850, bin, main_800CCC50]
+      - [0xCDB20, asm, main_800CCF20]
+      - [0xCDB9C, bin, main_800CCF9C]
+      - [0xCE420, bin, main_800CD820]
+      - [0xDB4EC, bin, main_800DA8EC]
+      - [0xDE14C, bin, main_800DD54C]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x400000]

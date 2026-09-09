@@ -1,0 +1,55 @@
+name: NFL QB Club 2001 (USA)
+sha1: c81421bb204270ef5ddd8f60dda51cdf73482fe2
+options:
+  basename: nflqbclub2001
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/nflqbclub2001.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80300000
+    subsegments:
+      - [0x1000, asm, main_80300000]
+      - [0x1040, asm, main_80300040]
+      - [0x2C38, bin, main_80301C38]
+      - [0x55AFC, asm, main_80354AFC]
+      - [0x55B14, bin, main_80354B14]
+      - [0x59DE8, asm, main_80358DE8]
+      - [0x59DF4, bin, main_80358DF4]
+      - [0x63898, asm, main_80362898]
+      - [0x638B0, bin, main_803628B0]
+      - [0x6E188, asm, main_8036D188]
+      - [0x6E18C, bin, main_8036D18C]
+      - [0x72594, asm, main_80371594]
+      - [0x725B0, bin, main_803715B0]
+      - [0xA0294, asm, main_8039F294]
+      - [0xA029C, bin, main_8039F29C]
+      - [0xB64A8, asm, main_803B54A8]
+      - [0xB64B0, bin, main_803B54B0]
+      - [0xEE37C, asm, main_803ED37C]
+      - [0xEE384, bin, main_803ED384]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0xC00000]

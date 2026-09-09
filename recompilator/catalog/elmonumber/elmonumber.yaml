@@ -1,0 +1,80 @@
+name: Elmos Number Journey (USA)
+sha1: 7195ea96d9fe5de065af61f70d55c92c8ee905e6
+options:
+  basename: elmonumber
+  target_path: baserom.z64
+  base_path: .
+  build_path: build
+  asm_path: asm
+  src_path: src
+  asset_path: assets
+  ld_script_path: build/elmonumber.ld
+  compiler: IDO
+  platform: n64
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  find_file_boundaries: false
+  use_legacy_include_asm: false
+  disassemble_all: false
+  mips_abi_float_regs: numeric
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: ipl3
+    type: bin
+    start: 0x40
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80000400
+    subsegments:
+      - [0x1000, asm, main_80000400]
+      - [0x633DC, asm, main_800627DC]
+      - [0x637C0, asm, main_80062BC0]
+      - [0x6D4A8, bin, main_8006C8A8]
+      - [0x6D4B0, asm, main_8006C8B0]
+      - [0x74F20, asm, main_80074320]
+      - [0x74F78, asm, main_80074378]
+      - [0x75804, bin, main_80074C04]
+      - [0x7A650, bin, main_80079A50]
+      - [0x7B2A0, asm, main_8007A6A0]
+      - [0x7B31C, asm, main_8007A71C]
+      - [0x841DC, bin, main_800835DC]
+      - [0x85AAC, asm, main_80084EAC]
+      - [0x85AEC, bin, main_80084EEC]
+      - [0x8F4E4, asm, main_8008E8E4]
+      - [0x93320, bin, main_80092720]
+      - [0x939D8, asm, main_80092DD8]
+      - [0x96F34, bin, main_80096334]
+      - [0x9CD40, asm, main_8009C140]
+      - [0x9D0A8, bin, main_8009C4A8]
+      - [0x9E8EC, asm, main_8009DCEC]
+      - [0x9ED10, asm, main_8009E110]
+      - [0x9F920, asm, main_8009ED20]
+      - [0xA1828, asm, main_800A0C28]
+      - [0xA2918, asm, main_800A1D18]
+      - [0xA31C0, asm, main_800A25C0]
+      - [0xA3218, bin, main_800A2618]
+      - [0xA4F38, bin, main_800A4338]
+      - [0xA5284, asm, main_800A4684]
+      - [0xA5288, bin, main_800A4688]
+      - [0xABC20, bin, main_800AB020]
+      - [0xADC60, bin, main_800AD060]
+      - [0xAFCE0, bin, main_800AF0E0]
+      - [0xB4D60, asm, main_800B4160]
+      - [0xB6110, bin, main_800B5510]
+      - [0xC0C04, bin, main_800C0004]
+      - [0xF4B18, asm, main_800F3F18]
+      - [0xF4B20, bin, main_800F3F20]
+      - [0xF5DF4, asm, main_800F51F4]
+      - [0xF5E0C, bin, main_800F520C]
+      - [0xF6278, asm, main_800F5678]
+      - [0xF627C, bin, main_800F567C]
+      - [0xF6C2C, asm, main_800F602C]
+      - [0xF6C30, bin, main_800F6030]
+  - name: assets
+    type: bin
+    start: 0x101000
+  - [0x800000]
