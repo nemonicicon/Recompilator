@@ -1,8 +1,0 @@
-# v1 bring-up stubs: jr jump-tables the static analyzer can't size (un-stub later)
-# SESSION 44: list emptied -- the entire 39-stub class (+static_5_80047620) was the
-# splat link layout shifting the ELF-reconstructed ROM (+8 data / +0x10 assets);
-# with lod_pinned.ld + input-alignment normalization the image is byte-exact and
-# every jump table sizes correctly. Add new entries here only with a diagnosis.
-# S44 data-as-code class: data pockets inside the code extent, blindly disassembled.
-# Bodies contain INVALID decodes + impossible jump targets; never executable on hardware.
-func_800AC04C

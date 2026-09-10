@@ -1,8 +1,0 @@
-      - [0x1000, asm, main_80200050]
-      - [0x42CC4, asm, main_80241D14]
-      - [0x43090, asm, main_802420E0]
-      - [0x572A0, asm, main_802562F0]
-      - [0x57AA0, bin, main_80256AF0]
-      - [0x57CF0, asm, main_80256D40]
-      - [0x57D20, asm, main2_80287430]
-      - [0xF3CB0, bin, main2_803233C0]

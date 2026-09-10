@@ -4,12 +4,12 @@
     py -3 recompilator/tools/export_release.py --dest D:\\stageprep
 
 The tree mirrors the N64PC layout (recompilator/, engine/, _masterbuild/) so the launcher finds its
-root and its CMake reaches the engine by relative path. The release carries the catalog of
-recompiler-side entries (09-07 09:16); the launcher roots itself on the pipeline driver and
-creates the user's own catalog folder for anything they build themselves.
+root and its CMake reaches the engine by relative path. Neither artifact carries the lab's per-game
+catalog (2026-09-09): the launcher roots itself on the pipeline driver and creates the user's own
+catalog folder for anything they build themselves.
 
-What goes (group 1 + 2 of alexbeav's four groups): the launcher, the pipeline scripts and tools, the
-scaffold templates, the catalog entries (addresses and names, never bytes), the engine forks as
+What goes: the launcher, the pipeline scripts and tools, the
+scaffold templates, the engine forks as
 source, the master CMake, the plan documents. What never goes: anything derived from a ROM
 (emission shadows, RecompiledFuncs, RAM-snapshot trees, base ROMs), bench logs, boards, dossiers,
 backups, build directories, the ROM library index, the SDK references.
@@ -43,12 +43,9 @@ SHIP_REPO = [
     ("engine/runtime",          "dir"),
     ("_masterbuild/CMakeLists.txt", "file"),
     ("recompilator/data",       "dir"),          # the libultra signature database (~1 MB)
-    # THE CATALOG SHIPS (decided 09-07, once testing showed what a user loses without it; every
-    # recompilation project ships this kind of per-game knowledge). An entry is RECOMPILER-SIDE knowledge about a cartridge - where its code lives, which
-    # library functions it uses, the app glue - and nothing from any ROM, ~250 KB a game. Without
-    # it a user gets only what the blind split works out unaided, which is not enough for Super
-    # Mario 64, whose audio library at 0x80378800 nobody finds by accident.
-    ("recompilator/catalog",    "dir"),
+    # THE CATALOG DOES NOT SHIP (2026-09-09 19:11, restoring the 09-07 05:40 ruling): it is per-game
+    # hand work, which is exactly what the blind path exists to make unnecessary. It stays a lab
+    # artifact; a released program knows nothing about any game until a cartridge is in hand.
 ]
 SHIP_RELEASE = [
     ("recompilator/templates",  "dir"),
@@ -59,12 +56,9 @@ SHIP_RELEASE = [
     ("engine/runtime/librecomp/include",  "dir"),
     ("engine/runtime/ultramodern/include", "dir"),
     ("recompilator/data",       "dir"),          # the libultra signature database (~1 MB)
-    # THE CATALOG SHIPS (decided 09-07, once testing showed what a user loses without it; every
-    # recompilation project ships this kind of per-game knowledge). An entry is RECOMPILER-SIDE knowledge about a cartridge - where its code lives, which
-    # library functions it uses, the app glue - and nothing from any ROM, ~250 KB a game. Without
-    # it a user gets only what the blind split works out unaided, which is not enough for Super
-    # Mario 64, whose audio library at 0x80378800 nobody finds by accident.
-    ("recompilator/catalog",    "dir"),
+    # THE CATALOG DOES NOT SHIP (2026-09-09 19:11, restoring the 09-07 05:40 ruling): it is per-game
+    # hand work, which is exactly what the blind path exists to make unnecessary. It stays a lab
+    # artifact; a released program knows nothing about any game until a cartridge is in hand.
 ]
 # THE PIPELINE IS AN ALLOWLIST. The recompilator root and recompilator/tools also hold the lab's
 # harnesses, census tools and one-off probes, many of which carry absolute paths of this machine.

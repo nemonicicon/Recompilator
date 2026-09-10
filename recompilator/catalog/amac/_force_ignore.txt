@@ -1,3 +1,0 @@
-func_8002D214
-func_8005AEF8
-func_80074B1C

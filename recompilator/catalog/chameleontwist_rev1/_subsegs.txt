@@ -1,6 +1,0 @@
-      - [0x1000, asm, main_80025C00]
-      - [0x10C8, asm, main_80025CC8]
-      - [0xB4744, asm, main_800D9344]
-      - [0xB4B10, asm, main_800D9710]
-      - [0xE88C0, bin, main_8010D4C0]
-      - [0xE9510, asm, main_8010E110]

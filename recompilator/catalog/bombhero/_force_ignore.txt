@@ -1,6 +1,0 @@
-func_800F54B0
-func_800F54B8
-func_800F62BC
-func_800F6D5C
-func_800F91A4
-func_800FB344

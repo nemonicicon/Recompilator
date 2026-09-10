@@ -1,7 +1,0 @@
-      - [0x1000, asm, main_80000400]
-      - [0x11E4, asm, main_800005E4]
-      - [0x3BAF4, asm, main_8003AEF4]
-      - [0x3BEC0, asm, main_8003B2C0]
-      - [0x4DD70, bin, main_8004D170]
-      - [0x4DFF0, asm, gamecode_8005BAD0]
-      - [0xF2A40, bin, gamecode_data]

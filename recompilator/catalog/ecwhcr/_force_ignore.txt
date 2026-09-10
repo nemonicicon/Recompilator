@@ -1,5 +1,0 @@
-func_8000B52C
-func_8000B574
-func_8000B7D8
-func_8000BA3C
-func_8000BA94

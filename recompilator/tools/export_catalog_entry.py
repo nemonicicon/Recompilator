@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""export_catalog_entry.py -- export ONE game's catalog entry (alexbeav's group 2: game config + our patches)
+"""export_catalog_entry.py -- export ONE game's catalog entry (game config + our patches; a lab tool)
 from the bench trees into catalog/<game>/, and AUDIT it: nothing from group 4 (ROM bytes or anything
 mechanically derived from them) may be in the export.  PACKAGING_FIRST_GAME.md (2026-09-06) is the plan.
 
