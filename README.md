@@ -1,6 +1,6 @@
 # Recompilator
 
-Pretty much a Recomp-emulator, using RT64 until it is replaced.
+Static recompilation of n64 games.
 
 ## About this project and AI
 
