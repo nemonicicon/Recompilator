@@ -1,41 +1,36 @@
 /**
- * engine_shims.c — ENGINE-DEBT SHIMS (SESSION 44 scorecard findings).
+ * engine_shims.c - the three engine symbols every game tree defines.
  *
- * The pinned engine is not yet fully game-agnostic: librecomp and rt64
- * reference three CV64-game-side symbols unconditionally, so any game built
- * on these pins must define them. Each shim below is a finding, not a fix —
- * the real cure is moving these behind game callbacks in the engine
- * (the census-then-strip class). Recorded in the lab notes.
+ * The runtime and the renderer reference three symbols that belong to one overlay format's
+ * boot machinery, so any tree built against them must define them; a game without that format
+ * supplies these defaults. They are findings, not fixes: the cure is for the engine to take
+ * these through registered callbacks with library defaults, which the module host already does.
  *
- *  1. librecomp/src/overlays.cpp ni_stub_gamenote_delete_mgr calls
- *     gamestate_change() — CV64's NI boot-phase machinery living in the
- *     engine. Keyed to CV64 boot conditions; must never fire for F1WGP.
- *  2. librecomp/src/overlays.cpp cv64_ni_section_content_matches reads
- *     ni_section_data_table[] — CV64's generated overlay-content catalog
- *     (the S36 content-verified matching). Empty table = legacy-accept path,
- *     correct for static-only F1WGP (overlay recompilation is PHASE 3).
- *  3. rt64/src/hle/rt64_application_window.cpp ApplicationWindow::setup calls
- *     cv64_set_wild_store_watch() — a retired CV64 diagnostic hook (S31-33).
+ *  1. librecomp/src/overlays.cpp calls gamestate_change() from the overlay boot path. It never
+ *     fires for a game without that overlay format; if it does, it says so on stderr.
+ *  2. librecomp/src/overlays.cpp reads ni_section_data_table[] to verify overlay content. An
+ *     empty table selects the legacy accept path, which is right for a static-only game.
+ *  3. rt64/src/hle/rt64_application_window.cpp calls a retired diagnostic hook at setup.
  */
 
 #include <stdint.h>
 #include <stdio.h>
 #include "recomp.h"
 
-/* 1 — CV64 NI boot-stub hook; loudly visible if it ever fires for F1WGP. */
+/* 1 - overlay boot-stub hook; loud if it ever fires for a game without that overlay format. */
 RECOMP_FUNC void gamestate_change(uint8_t* rdram, recomp_context* ctx) {
     (void)rdram;
-    fprintf(stderr, "[engine_shim] gamestate_change(%d) called — CV64 NI boot-stub path fired for F1WGP?!\n",
+    fprintf(stderr, "[engine_shim] gamestate_change(%d) called - the overlay boot-stub path fired for a game without overlays?\n",
             (int)ctx->r4);
     fflush(stderr);
 }
 
-/* 2 — empty NI section-content catalog (count = 0; the entry is never read). */
+/* 2 - empty overlay section-content catalog (count = 0; the entry is never read). */
 struct NiSectionData { uint32_t lma; const uint8_t* data; uint32_t size; };
 const struct NiSectionData ni_section_data_table[] = { { 0u, 0, 0u } };
 const size_t ni_section_data_table_count = 0;
 
-/* 3 — retired CV64 diagnostic hook. */
+/* 3 - retired diagnostic hook. */
 void cv64_set_wild_store_watch(void* addr) {
     (void)addr;
 }

@@ -331,11 +331,10 @@ def app_dir(root: Path, game: str) -> Path:
 
 
 def macro_inc_source(root: Path) -> Path:
-    """The assembler macro header every splat tree needs. It is OUR file, so a release carries it as
-    a template; the lab's reference tree is used when it is there."""
-    for c in (RECOMPILATOR / "templates" / "tree" / "macro.inc", root / "waverace" / "include" / "macro.inc"):
-        if c.is_file():
-            return c
+    """The assembler macro header every splat tree needs. It is our own file, shipped as a template."""
+    c = RECOMPILATOR / "templates" / "tree" / "macro.inc"
+    if c.is_file():
+        return c
     raise BringupError("TREE", "no macro.inc template (recompilator/templates/tree/macro.inc)")
 
 

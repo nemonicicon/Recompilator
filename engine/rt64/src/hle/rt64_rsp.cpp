@@ -45,7 +45,7 @@ extern "C" { uint32_t g_lle_z_consume_idx = 0u; }
 // rt64 accumulates the estimated cycles per submitted DL here; ultramodern's gfx thread then delays
 // dp_complete until the real RDP would have finished → the game's OWN pacing logic drops frames exactly
 // like hardware → lag-tuned content (voice triggers, demos, the DK64 vines) lands correctly. Faithful,
-// game-agnostic; the script/data is never touched. Gate: env CV64_AUTHENTIC_TIMING=0 disables.
+// game-agnostic; the script/data is never touched. Gate: env RECOMP_AUTHENTIC_TIMING (default off).
 extern "C" { double g_rdp_estimated_cost_cycles = 0.0; }
 // Calibration v2 (S41, from a measured run): v1's 2.5x contention stacked on the 2-cycle cost pinned the
 // intro at the 100ms clamp (10fps) vs the measured ~21fps hardware truth — the real RDP's span buffers
@@ -713,7 +713,7 @@ namespace RT64 {
                     fflush(stderr);
                 }
             }
-            {   // [dkrcensus-tri] instrument only, env RECOMP_DKR_CENSUS=1, default silent. The 1997
+            {   // [dkrcensus-tri] instrument only, env RT64_GBI_CENSUS=1, default silent. The 1997
                 // and 1998 microcodes both compute per-vertex clip codes and hand any triangle that
                 // straddles a frustum plane to a clipping overlay (JFG: IMEM 0x870, reached from the
                 // draw routine at 0x1A90 when the OR of the three codes hits its mask), and DROP one
@@ -721,7 +721,7 @@ namespace RT64 {
                 // much geometry that would be: triangles with a vertex behind the eye (w <= 0) and
                 // triangles wholly outside one plane. A number here decides whether a faithful clip
                 // is worth a build, instead of a guess from a screenshot.
-                static const bool on = [] { const char *e = std::getenv("RECOMP_DKR_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
+                static const bool on = [] { const char *e = std::getenv("RT64_GBI_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
                 if (on) {
                     static unsigned long long nT = 0, nBehind = 0, nStraddle = 0, nAllOut = 0, nWide = 0;
                     const hlslpp::float4x4 &m = dkrMatrix[dkrMatrixIndex];
@@ -809,7 +809,7 @@ namespace RT64 {
             // whose three codes share an outside bit and hand a straddling one to the clipper
             // overlay (IMEM 0x870 on the 1998 build, 0x7D8 on DKR's). RT64's HLE did neither, so
             // every triangle crossing or behind the eye reached the rasterizer with w <= 0 and its
-            // xy/w exploded across the screen. MEASURED on Mickey's Speedway (RECOMP_DKR_CENSUS +
+            // xy/w exploded across the screen. MEASURED on Mickey's Speedway (RT64_GBI_CENSUS +
             // RECOMP_VTX_CENSUS, 90 s): of 1,700,000 triangles, 998,259 have a vertex with w <= 0,
             // 71,135 straddle, and only 104,191 of 1,600,000 put any vertex inside the frustum -
             // i.e. the screen was being painted by geometry the RSP never draws. Clipping is done
@@ -882,8 +882,8 @@ namespace RT64 {
                     }
                 }
 
-                {   // [dkrnearclip] instrument only, env RECOMP_DKR_CENSUS=1, default silent.
-                    static const bool on = [] { const char *e = std::getenv("RECOMP_DKR_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
+                {   // [dkrnearclip] instrument only, env RT64_GBI_CENSUS=1, default silent.
+                    static const bool on = [] { const char *e = std::getenv("RT64_GBI_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
                     if (on) {
                         static unsigned long long nSeen = 0, nDropped = 0, nClipped = 0;
                         nSeen++;
@@ -927,12 +927,12 @@ namespace RT64 {
             floatMatrix = hlslpp::mul(floatMatrix, dkrMatrix[srcIndex & 0x7u]);
         }
         dkrMatrix[index] = floatMatrix;
-        {   // [dkrcensus-mtx2 2026-09-06] instrument only, env RECOMP_DKR_CENSUS=1, default silent.
+        {   // [dkrcensus-mtx2 2026-09-06] instrument only, env RT64_GBI_CENSUS=1, default silent.
             // [dkrmtx] below is capped at the first four loads, i.e. the boot screen only; this one
             // samples the STEADY state so "what matrix is actually current when the game draws" is a
             // number. On a multiply it prints both operands and the product, because the operand
             // ORDER is the one field of the 1998 G_MTX that a picture cannot disambiguate.
-            static const bool on = [] { const char *e = std::getenv("RECOMP_DKR_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
+            static const bool on = [] { const char *e = std::getenv("RT64_GBI_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
             if (on) {
                 static unsigned long long n = 0;
                 n++;

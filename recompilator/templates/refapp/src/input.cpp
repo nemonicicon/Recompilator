@@ -84,13 +84,13 @@ bool waverace_get_input(int controller_num, uint16_t* buttons, float* x, float* 
         };
         if (btn(controller, SDL_CONTROLLER_BUTTON_A))             *buttons |= N64_A;
         if (btn(controller, SDL_CONTROLLER_BUTTON_B))             *buttons |= N64_B;
-        if (btn(controller, SDL_CONTROLLER_BUTTON_BACK))          *buttons |= N64_Z;
+        if (btn(controller, SDL_CONTROLLER_BUTTON_BACK))          *buttons |= N64_L;
         if (btn(controller, SDL_CONTROLLER_BUTTON_START))         *buttons |= N64_START;
         if (btn(controller, SDL_CONTROLLER_BUTTON_DPAD_UP))       *buttons |= N64_DUP;
         if (btn(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN))     *buttons |= N64_DDOWN;
         if (btn(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT))     *buttons |= N64_DLEFT;
         if (btn(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))    *buttons |= N64_DRIGHT;
-        if (btn(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER))  *buttons |= N64_L;
+        if (btn(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER))  *buttons |= N64_Z;
         if (btn(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) *buttons |= N64_R;
         // C-buttons mapped to right stick cardinal directions
         Sint16 rx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTX);
@@ -117,6 +117,12 @@ bool waverace_get_input(int controller_num, uint16_t* buttons, float* x, float* 
         if (kb[SDL_SCANCODE_DOWN])   *buttons |= N64_DDOWN;
         if (kb[SDL_SCANCODE_LEFT])   *buttons |= N64_DLEFT;
         if (kb[SDL_SCANCODE_RIGHT])  *buttons |= N64_DRIGHT;
+    if (kb[SDL_SCANCODE_Q])      *buttons |= N64_L;
+    if (kb[SDL_SCANCODE_E])      *buttons |= N64_R;
+    if (kb[SDL_SCANCODE_I])      *buttons |= N64_CUP;
+    if (kb[SDL_SCANCODE_K])      *buttons |= N64_CDOWN;
+    if (kb[SDL_SCANCODE_J])      *buttons |= N64_CLEFT;
+    if (kb[SDL_SCANCODE_L])      *buttons |= N64_CRIGHT;
 
         // WASD â†’ analog stick
         if (kb[SDL_SCANCODE_A]) *x -= 1.0f;

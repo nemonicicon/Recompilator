@@ -10,9 +10,9 @@
  * launcher's own update_gfx pump (main.cpp) already drains the event queue every frame, which is
  * what refreshes SDL_GetKeyboardState() and the cached gamepad state read below.
  *
- * Keyboard map, kept byte-for-byte identical to the port trees' src/input.cpp so that every
- * existing capture script and every player's muscle memory still works:
- *   Z = A · X = B · LSHIFT = Z · RETURN = START · arrows = D-pad · WASD = analog stick.
+ * The bindings themselves live in launcher_controls.cpp: the CONTROLS screen edits them and
+ * they are read here through controls::read_pad / read_keys. Only the analog stick is fixed
+ * (the left stick, or W A S D).
  */
 
 #include <cstdint>
@@ -20,26 +20,12 @@
 #include <algorithm>
 
 #include "SDL.h"
+#include "launcher_controls.hpp"
 #include "ultramodern/input.hpp"
 #include "ultramodern/ultramodern.hpp"
 
 namespace {
 
-// N64 button bit masks (libultra osContPad).
-constexpr uint16_t N64_A      = 0x8000;
-constexpr uint16_t N64_B      = 0x4000;
-constexpr uint16_t N64_Z      = 0x2000;
-constexpr uint16_t N64_START  = 0x1000;
-constexpr uint16_t N64_DUP    = 0x0800;
-constexpr uint16_t N64_DDOWN  = 0x0400;
-constexpr uint16_t N64_DLEFT  = 0x0200;
-constexpr uint16_t N64_DRIGHT = 0x0100;
-constexpr uint16_t N64_L      = 0x0020;
-constexpr uint16_t N64_R      = 0x0010;
-constexpr uint16_t N64_CUP    = 0x0008;
-constexpr uint16_t N64_CDOWN  = 0x0004;
-constexpr uint16_t N64_CLEFT  = 0x0002;
-constexpr uint16_t N64_CRIGHT = 0x0001;
 
 SDL_GameController* g_pad = nullptr;
 
@@ -55,27 +41,7 @@ bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
     *y = 0.0f;
 
     if (g_pad != nullptr) {
-        auto btn = [](SDL_GameControllerButton b) {
-            return SDL_GameControllerGetButton(g_pad, b) != 0;
-        };
-        if (btn(SDL_CONTROLLER_BUTTON_A))             *buttons |= N64_A;
-        if (btn(SDL_CONTROLLER_BUTTON_B))             *buttons |= N64_B;
-        if (btn(SDL_CONTROLLER_BUTTON_BACK))          *buttons |= N64_Z;
-        if (btn(SDL_CONTROLLER_BUTTON_START))         *buttons |= N64_START;
-        if (btn(SDL_CONTROLLER_BUTTON_DPAD_UP))       *buttons |= N64_DUP;
-        if (btn(SDL_CONTROLLER_BUTTON_DPAD_DOWN))     *buttons |= N64_DDOWN;
-        if (btn(SDL_CONTROLLER_BUTTON_DPAD_LEFT))     *buttons |= N64_DLEFT;
-        if (btn(SDL_CONTROLLER_BUTTON_DPAD_RIGHT))    *buttons |= N64_DRIGHT;
-        if (btn(SDL_CONTROLLER_BUTTON_LEFTSHOULDER))  *buttons |= N64_L;
-        if (btn(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) *buttons |= N64_R;
-
-        const Sint16 rx = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_RIGHTX);
-        const Sint16 ry = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_RIGHTY);
-        constexpr Sint16 DEAD = 12000;
-        if (ry < -DEAD) *buttons |= N64_CUP;
-        if (ry >  DEAD) *buttons |= N64_CDOWN;
-        if (rx < -DEAD) *buttons |= N64_CLEFT;
-        if (rx >  DEAD) *buttons |= N64_CRIGHT;
+        *buttons |= launcher::controls::read_pad(g_pad);
 
         const Sint16 lx = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_LEFTX);
         const Sint16 ly = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_LEFTY);
@@ -86,14 +52,7 @@ bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
 
     const Uint8* kb = SDL_GetKeyboardState(nullptr);
     if (kb == nullptr) return true;
-    if (kb[SDL_SCANCODE_Z])      *buttons |= N64_A;
-    if (kb[SDL_SCANCODE_X])      *buttons |= N64_B;
-    if (kb[SDL_SCANCODE_LSHIFT]) *buttons |= N64_Z;
-    if (kb[SDL_SCANCODE_RETURN]) *buttons |= N64_START;
-    if (kb[SDL_SCANCODE_UP])     *buttons |= N64_DUP;
-    if (kb[SDL_SCANCODE_DOWN])   *buttons |= N64_DDOWN;
-    if (kb[SDL_SCANCODE_LEFT])   *buttons |= N64_DLEFT;
-    if (kb[SDL_SCANCODE_RIGHT])  *buttons |= N64_DRIGHT;
+    *buttons |= launcher::controls::read_keys(kb);
     if (kb[SDL_SCANCODE_A]) *x -= 1.0f;
     if (kb[SDL_SCANCODE_D]) *x += 1.0f;
     if (kb[SDL_SCANCODE_W]) *y += 1.0f;

@@ -28,7 +28,6 @@ sys.path.insert(0, str(HERE / "tools"))
 # file keeps what is its own: the scoreboard, the triage, the two per-game maps below and the
 # Docker/MSBuild lab route.
 import blind_bringup as blind
-REF = N64PC / "waverace"                 # front-end skeleton source
 SWEEP_CML = N64PC / "sweep" / "CMakeLists.txt"
 RECOMP_EXE = N64PC / "engine" / "runtime" / "N64Recomp" / "build_cli" / "Release" / "N64Recomp.exe"
 CMAKE = r"C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"

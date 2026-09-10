@@ -12,14 +12,14 @@
 #include <cstdlib>
 
 namespace RT64 {
-    // [dkrcensus 2026-09-06] instrument only, env RECOMP_DKR_CENSUS=1, default silent. It exists
+    // [dkrcensus 2026-09-06] instrument only, env RT64_GBI_CENSUS=1, default silent. It exists
     // because every DKR-family field guess costs a full build: it prints the RAW w0/w1 of the first
     // matrix and vertex commands plus a running histogram of the decoded fields, so "which bits carry
     // the matrix destination / the vertex count" is read off one boot instead of inferred from a
     // picture. Shared by both dialects so the two can be compared on the same stream.
     namespace GBI_DKRCensus {
         static bool enabled() {
-            static const bool on = [] { const char *e = std::getenv("RECOMP_DKR_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
+            static const bool on = [] { const char *e = std::getenv("RT64_GBI_CENSUS"); return (e != nullptr) && (e[0] == '1'); }();
             return on;
         }
 

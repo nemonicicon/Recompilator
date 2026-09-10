@@ -42,7 +42,7 @@ extern "C" uint8_t* g_rdram_base;
 // constant. The app (e.g. cv64pc/src/main.cpp) sets it to the address of its own cutscene-state word;
 // if it is left unset (std::nullopt — every game but cv64), the hardware-timing layer is disabled for
 // that game, so the gate can never read garbage out of another game's RAM (the SM64-boot-misfire class).
-// The global CV64_AUTHENTIC_TIMING env var remains the master switch. Same extern-"C" bridge pattern as
+// The global RECOMP_AUTHENTIC_TIMING env var remains the master switch. Same extern-"C" bridge pattern as
 // g_rdram_base (defined in the consumer, set by the producer); no shared header touched.
 std::optional<uint32_t> g_cutscene_gate_phys_addr = std::nullopt;
 
@@ -1155,7 +1155,7 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
                 // overruns its VI budget on heavy frames exactly like hardware (intro ≈21fps vs the
                 // authored 30) → lag-tuned content (the t=940 voice trigger) lands correctly. The CPU
                 // keeps simulating in parallel, audio is real-time — both as on hardware. Faithful and
-                // game-agnostic; the script/data is never touched. Disable: CV64_AUTHENTIC_TIMING=0.
+                // game-agnostic; the script/data is never touched. Disable: RECOMP_AUTHENTIC_TIMING=0.
                 g_rdp_estimated_cost_cycles = 0.0;
                 // P1 (TIMING_FIDELITY_DESIGN): reset the v2 counting accumulators alongside v1.
                 for (int _t2i = 0; _t2i < 4; _t2i++) g_rdptime2_pix[_t2i] = 0.0;
@@ -1203,14 +1203,14 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
 
                 {
                     static const bool authentic_timing = [] {
-                        const char* e = std::getenv("CV64_AUTHENTIC_TIMING");
+                        const char* e = std::getenv("RECOMP_AUTHENTIC_TIMING");
                         // SM64PC SESSION 45 (this branch): DEFAULT OFF. The layer is a
                         // CV64-profile feature — its gate reads CV64's sys.cutscene_ID at
                         // phys 0x389EF8, which in any OTHER game's RAM is arbitrary data
                         // (SM64 boot #3: gate ENABLED + garbage read = the cutscene pacing
-                        // could engage on boot frames). Opt in with CV64_AUTHENTIC_TIMING=1.
+                        // could engage on boot frames). Opt in with RECOMP_AUTHENTIC_TIMING=1.
                         bool on = (e && e[0] == '1');
-                        fprintf(stderr, "[rdptime] authentic timing %s (CV64_AUTHENTIC_TIMING=%s; default OFF on the sm64 branch)\n",
+                        fprintf(stderr, "[rdptime] authentic timing %s (RECOMP_AUTHENTIC_TIMING=%s; default OFF)\n",
                                 on ? "ENABLED" : "DISABLED", e ? e : "(unset)");
                         return on;
                     }();
@@ -1225,11 +1225,11 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
                     if (g_cutscene_gate_phys_addr.has_value() && g_rdram_base != nullptr) {
                         in_cutscene = (*reinterpret_cast<uint32_t*>(g_rdram_base + *g_cutscene_gate_phys_addr) != 0u);
                     }
-                    // DK64 test path: CV64_AUTHENTIC_ALWAYS forces the layer on every frame and drives it from
+                    // DK64 test path: RECOMP_AUTHENTIC_ALWAYS forces the layer on every frame and drives it from
                     // the now-fixed RAW RDP-cost estimate (no CV64 measured-cadence calibration), with a 60Hz
                     // VI-deadline FLOOR (light frames don't free-run past hardware) and a safety cap
-                    // (CV64_AUTHENTIC_CAP_MS, default 50 = 20fps). (Experimental; verify then wire a DK64 gate.)
-                    static const bool authentic_always = (std::getenv("CV64_AUTHENTIC_ALWAYS") != nullptr);
+                    // (RECOMP_AUTHENTIC_CAP_MS, default 50 = 20fps). (Experimental; verify then wire a DK64 gate.)
+                    static const bool authentic_always = (std::getenv("RECOMP_AUTHENTIC_ALWAYS") != nullptr);
                     if (authentic_always) in_cutscene = true;
                     if (authentic_timing && in_cutscene) {
                         // cycles -> microseconds at the RDP's 62.5 MHz.
@@ -1243,7 +1243,7 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
                         std::chrono::high_resolution_clock::time_point rdp_done;
                         if (authentic_always) {
                             static const double cap_us = [] {
-                                const char* e = std::getenv("CV64_AUTHENTIC_CAP_MS");
+                                const char* e = std::getenv("RECOMP_AUTHENTIC_CAP_MS");
                                 return ((e && e[0]) ? atof(e) : 50.0) * 1000.0;
                             }();
                             if (cost_us > cap_us) cost_us = cap_us;
@@ -1311,7 +1311,7 @@ void gfx_thread_func(uint8_t* rdram, moodycamel::LightweightSemaphore* thread_re
                 // interpreted intro) free-runs its logic many times faster than 60Hz. Fix: hold the
                 // frame-done (dp_complete) until time >= the next VI deadline — the SAME deadline the VI
                 // thread computes (get_start() + total_vis*1e6us/60) — so logic is paced to one frame per
-                // 60Hz tick. We mirror the CV64_AUTHENTIC_TIMING block above exactly: do NOT sleep this
+                // 60Hz tick. We mirror the RECOMP_AUTHENTIC_TIMING block above exactly: do NOT sleep this
                 // thread (it also services the VI/screen updates), but hand the deadline to a dedicated
                 // timer thread that delivers dp_complete() at the deadline; the game (the only thing
                 // waiting on DP-done) then paces itself while the VI flows freely. Baseline-safe: when the

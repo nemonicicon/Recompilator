@@ -125,7 +125,7 @@ TEXT_EXT = (".c", ".cpp", ".h", ".hpp", ".hlsl", ".hlsli", ".inc", ".tmpl", ".py
 # built things outside a vendored dependency are never source
 BINARY_EXT = (".exe", ".obj", ".pdb", ".ilk", ".lib", ".dll", ".exp")
 EXCLUDE_FILE_RE = re.compile(
-    r"(\.bak(_|\.|$)|\.pre_|_attempt_|\.orig$|\.rej$|\.png$|\.log$|\.pcm$|\.wav$|\.raw$|\.tsv$|"
+    r"(\.bak(_|\.|$)|\.pre_|_attempt_|\.camerafix$|pristine_bak|rung157|\.orig$|\.rej$|\.png$|\.log$|\.pcm$|\.wav$|\.raw$|\.tsv$|"
     r"^capture_.*\.ps1$|\.z64$|\.n64$|\.v64$|^baserom|\.jsonl$)", re.I)
 LAUNCHER_EXCLUDE_FILE_RE = re.compile(r"\.ps1$|\.png$", re.I)   # every bench driver beside the launcher is lab-only
 

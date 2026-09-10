@@ -100,7 +100,7 @@ enum class Action { None, Up, Down, Left, Right, Enter, Escape, AddRom, Build, Q
 // hit-test against. Instead the DRAW pass records the rectangle of everything clickable it just
 // drew, and the SDL pump on the main thread tests the pointer against those rectangles. The look
 // does not change by one pixel; the hit rectangles are the ones already being drawn.
-enum class HitKind { None, Row, Tab, Hint };
+enum class HitKind { None, Row, Tab, Hint, Opt };
 
 struct HitRect {
     float x0 = 0, y0 = 0, x1 = 0, y1 = 0;   // in FRAMEBUFFER pixels (what the draw pass works in)
@@ -153,6 +153,7 @@ struct UiState {
     // never silently, and never without a way back (09-07).
     int  opt_sel   = 0;                // the focused row on VIDEO/AUDIO/CONTROLS
     int  opt_count = 0;                // how many rows that screen drew
+    bool bind_listen = false;          // CONTROLS: the focused row is waiting for a button or a key
 
     bool exit_prompt = false;          // the yes/no overlay is up over the running game
 
@@ -241,6 +242,13 @@ void ui_set_window(void* sdl_window);
 // Input, all from the main thread (SDL pump in update_gfx). `Action` is declared above, with the
 // hit rectangles that carry it.
 void ui_action(Action a);
+
+// CONTROLS rebinding. While a row is listening, the pump routes the next key or pad press here
+// instead of into ui_action; Esc cancels. Each binding is saved to controls.ini at once.
+bool ui_bind_listening();
+void ui_bind_key(int scancode);                    // an SDL_Scancode
+void ui_bind_pad(int kind, int index, int sign);   // the fields of controls::PadBind
+void ui_bind_cancel();
 
 // MOUSE, also from the main thread's SDL pump. Coordinates are SDL WINDOW coordinates; the UI
 // converts them to framebuffer pixels itself. A move to (-1,-1) means the pointer left the window.

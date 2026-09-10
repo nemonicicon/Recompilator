@@ -61,6 +61,7 @@ add_executable(recompilator WIN32
     src/launcher_module.cpp   # STEP 3: loads <game>pc/module/<game>.dll and starts the game here
     src/launcher_audio.cpp    # the host's SDL audio backend, shared by every module
     src/launcher_input.cpp    # the host's SDL controller backend, shared by every module
+    src/launcher_controls.cpp # the binding table the CONTROLS screen edits and launcher_input reads
 )
 # src/engine_shims.c is GONE. It existed because librecomp referenced three CV64-shaped
 # application symbols unconditionally; librecomp now carries its own fallbacks as library members

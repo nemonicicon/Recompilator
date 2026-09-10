@@ -1402,20 +1402,6 @@ extern "C" void recomp_baremetal_idle() {
                     if (g_wave_fresh) { g_wave_fresh = false; bm_world_reset(); }
                     static int _gd = 0;
                     ++_gd;
-                    // [flagpoke v2 2026-08-27] the July mechanism-proof, re-triggered: the worker
-                    // parks at 0x80018BAC polling the loader completion word; on hardware the
-                    // copy-down writes it. Poke it once mid-wedge (env RECOMP_SOTE_FLAGPOKE=1):
-                    // if the worker wakes and the world advances, the missing link is CONFIRMED
-                    // as this one signal and we chase its true producer on the oracle.
-                    {
-                        static const bool fp2 = [] { const char* e = std::getenv("RECOMP_SOTE_FLAGPOKE"); return (e != nullptr) && (e[0] == '1'); }();
-                        if (fp2 && _gd == 200 && g_rdram != nullptr) {
-                            *(uint32_t*)(g_rdram + 0x199CC0u) = 1u;
-                            *(uint32_t*)(g_rdram + 0x199CC4u) = 0x012A0000u;   // truth's settled value
-                            fprintf(stderr, "[flagpoke2] wrote completion state at ghost-delivery #200%c", 0x0A);
-                            fflush(stderr);
-                        }
-                    }
                     if (_gd <= 6 || (_gd % 2000) == 0) {
                         fprintf(stderr, "[ghost-delivery] #%d handler bytes differ from latch but ghost covers 0x%08X — delivering via pre-wave ghost code%c", _gd, g_handler, 0x0A);
                         fflush(stderr);
@@ -1569,22 +1555,6 @@ extern "C" void recomp_baremetal_idle() {
                         fprintf(stderr, "%s\n", (rdw(q + 0u) >> 28) == 0x8u ? "" : " (empty)");
                     }
                     fflush(stderr);
-                }
-                // [flagpoke] (env RECOMP_SOTE_FLAGPOKE=1) EXPERIMENT: the worker's month-old hang
-                // is a poll-yield loop inside the game's async-loader wait (0x80019444), spinning on
-                // completion state at 0x80199Cxx that only an async completer ever sets - and the
-                // completer's kernel was eaten by the load itself. The payload DATA demonstrably
-                // arrives (the transit sampler watched it land); only the SIGNAL is missing. Set the
-                // completion flag once, a few holds after the wave begins: if the loop releases and
-                // the transfer runs, the mechanism is proven and the real fix (running the completer)
-                // is justified. One poke, one word, env-gated, logged.
-                {
-                    static const bool fp_on = [] { const char* e = std::getenv("RECOMP_SOTE_FLAGPOKE"); return (e != nullptr) && (e[0] == '1'); }();
-                    if (fp_on && hv_holds == 50) {
-                        *(uint32_t*)(g_rdram + 0x199CC0u) = 1u;
-                        fprintf(stderr, "[hverify][flagpoke] wrote 1 to 0x80199CC0 (loader completion flag) at hold #%d\n", hv_holds);
-                        fflush(stderr);
-                    }
                 }
                 // [svcq-at-hold] Is the guest kernel's service table still LIVE while its handler
                 // is stomped? If table[src] holds a valid queue, the held delivery can be done

@@ -37,6 +37,7 @@
 
 #include "rt64_renderer.hpp"
 #include "launcher_app.hpp"
+#include "launcher_controls.hpp"
 
 namespace fs = std::filesystem;
 
@@ -128,6 +129,7 @@ create_window(ultramodern::gfx_callbacks_t::gfx_data_t /*gfx_data*/)
 
 // ── input: keyboard + one pad, straight into the launcher's state machine ────
 static SDL_GameController* g_pad = nullptr;
+static bool g_pad_sync = false;   // a pad press just became a binding: swallow it once
 
 static void open_pad() {
     for (int i = 0; i < SDL_NumJoysticks(); i++) {
@@ -160,6 +162,14 @@ static void poll_pad() {
         { SDL_CONTROLLER_BUTTON_X,          launcher::Action::Build   },
     };
     static bool held[SDL_arraysize(binds)] = {};
+    // While the CONTROLS screen is listening, a press is a BINDING (taken from the event pump),
+    // not a menu action; and the press that just became one is swallowed here once, so the
+    // button still held down does not also fire the action it used to be.
+    if (launcher::ui_bind_listening() || g_pad_sync) {
+        for (size_t i = 0; i < SDL_arraysize(binds); i++) held[i] = SDL_GameControllerGetButton(g_pad, binds[i].btn) != 0;
+        g_pad_sync = false;
+        return;
+    }
     for (size_t i = 0; i < SDL_arraysize(binds); i++) {
         const bool down = SDL_GameControllerGetButton(g_pad, binds[i].btn) != 0;
         if (down && !held[i]) launcher::ui_action(binds[i].action);
@@ -180,6 +190,21 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t /*gfx_data*/) {
         case SDL_CONTROLLERDEVICEREMOVED:
             if (g_pad) { SDL_GameControllerClose(g_pad); g_pad = nullptr; open_pad(); }
             break;
+        case SDL_CONTROLLERBUTTONDOWN:
+            if (launcher::ui_bind_listening()) {
+                launcher::ui_bind_pad(1, (int)e.cbutton.button, 1);
+                g_pad_sync = true;
+            }
+            break;
+        case SDL_CONTROLLERAXISMOTION:
+            // A trigger pulled past half way binds like a button; the sticks are never buttons.
+            if (launcher::ui_bind_listening() &&
+                (e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT) &&
+                e.caxis.value > 16000) {
+                launcher::ui_bind_pad(2, (int)e.caxis.axis, 1);
+                g_pad_sync = true;
+            }
+            break;
         case SDL_KEYDOWN:
             // STEP 3: once a game module has taken this window, EVERY key is the game's. The game
             // reads SDL_GetKeyboardState(), which this very pump refreshes, so the launcher simply
@@ -188,6 +213,13 @@ static void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t /*gfx_data*/) {
             // leave-or-not question is up.
             if (launcher::ui_game_in_process() && !launcher::ui_exit_prompt()) {
                 if (e.key.keysym.sym == SDLK_ESCAPE) launcher::ui_action(launcher::Action::Escape);
+                break;
+            }
+            // CONTROLS is listening: this key IS the binding (Esc keeps the old one).
+            if (launcher::ui_bind_listening()) {
+                if (e.key.repeat) break;
+                if (e.key.keysym.sym == SDLK_ESCAPE) launcher::ui_bind_cancel();
+                else launcher::ui_bind_key((int)e.key.keysym.scancode);
                 break;
             }
             switch (e.key.keysym.sym) {
@@ -311,6 +343,7 @@ static int launcher_main(int argc, char** argv) {
 
     SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
     open_pad();
+    launcher::controls::load(launcher::config_dir());
     // The host's own audio device, opened before recomp::start() because ultramodern takes the
     // audio and input callbacks once, at start(), and a game module arrives long after that.
     launcher::audio_init();

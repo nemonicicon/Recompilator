@@ -15,11 +15,12 @@
  * game there is no inspector frame to draw into, and the inspector object itself does not exist
  * until F1 is pressed. So the launcher creates its own ImGui context, initialised the same way the
  * inspector initialises its own (rt64_inspector.cpp:64-142), and makes it current only for the
- * duration of its own hook. It cannot fight the inspector's context: the launcher turns
- * developerMode off on its RT64 Application, so F1..F4 do nothing in this window.
+ * duration of its own hook and restores the previous one after. The inspector's context is
+ * created lazily on the first F1, so the two exist side by side and F1 stays live in a game.
  */
 
 #include "launcher_app.hpp"
+#include "launcher_controls.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -866,40 +867,53 @@ void draw_audio(ImDrawList* dl, float w, float h, float sc, UiState& s) {
 void draw_controls(ImDrawList* dl, float w, float h, float sc, UiState& s) {
     float x0 = 0, x1 = 0, y = 0;
     settings_frame(dl, w, h, sc, s, "CONTROLS", x0, x1, y);
-    const float row = 40 * sc;
-    struct Bind { const char* what; const char* pad; const char* key; };
-    static const Bind BINDS[] = {
-        { "A",            "A",              "Z" },
-        { "B",            "B",              "X" },
-        { "Z",            "Back",           "Left Shift" },
-        { "Start",        "Start",          "Enter" },
-        { "L / R",        "Shoulders",      "A / S" },
-        { "Stick",        "Left stick",     "Arrow keys" },
-        { "C buttons",    "Right stick",    "I J K L" },
-        { "D-pad",        "D-pad",          "Numpad" },
-        { "Leave a game", "-",              "Esc" },
-    };
-    const float fs = 21.0f * sc, fs_h = 16.0f * sc;
-    const float cw = x0 + (x1 - x0) * 0.40f, ck = x0 + (x1 - x0) * 0.68f;
+    using namespace launcher::controls;
+    // Eighteen rows have to fit above the hint bar; a short window gets a tighter pitch.
+    const float row = (h < 820.0f ? 26.0f : 30.0f) * sc;
+    const float fs = (h < 820.0f ? 17.0f : 19.0f) * sc, fs_h = 15.0f * sc;
+    const float cp = x0 + (x1 - x0) * 0.34f, ck = x0 + (x1 - x0) * 0.62f;
     text(dl, x0 + 26 * sc, y, fs_h, COL_DIM, "N64");
-    text(dl, cw,           y, fs_h, COL_DIM, "GAMEPAD");
+    text(dl, cp,           y, fs_h, COL_DIM, "GAMEPAD");
     text(dl, ck,           y, fs_h, COL_DIM, "KEYBOARD");
-    y += 30 * sc;
-    for (const Bind& b : BINDS) {
-        const bool leave = (b.what[0] == 'L' && b.what[1] == 'e');
-        text(dl, x0 + 26 * sc, y, fs, leave ? COL_ACCENT : COL_TEXT, b.what);
-        text(dl, cw,           y, fs, leave ? COL_ACCENT : COL_TEXT, b.pad);
-        text(dl, ck,           y, fs, leave ? COL_ACCENT : COL_TEXT, b.key);
+    y += 24 * sc;
+    int n = 0;
+    auto line = [&](int idx, const char* what, const std::string& pad, const std::string& key, bool dim) {
+        const bool sel = (idx >= 0 && idx == s.opt_sel);
+        if (sel) {
+            dl->AddRectFilled(ImVec2(x0 + 8 * sc, y - 4 * sc), ImVec2(x1 - 8 * sc, y + row - 6 * sc), COL_ROWSEL, 1.0f);
+            dl->AddRectFilled(ImVec2(x0 + 8 * sc, y - 4 * sc), ImVec2(x0 + 12 * sc, y + row - 6 * sc), COL_ACCENT);
+        }
+        const ImU32 col = sel ? COL_ACCENT : (dim ? COL_DIM : COL_TEXT);
+        text(dl, x0 + 26 * sc, y, fs, col, what);
+        if (sel && s.bind_listen) {
+            text(dl, cp, y, fs, COL_ACCENT, "press the pad button or the key you want   (Esc keeps it)");
+        } else {
+            text(dl, cp, y, fs, col, pad);
+            text(dl, ck, y, fs, col, key);
+        }
+        if (idx >= 0) hit_add(s, x0 + 8 * sc, y - 4 * sc, x1 - 8 * sc, y + row - 6 * sc, HitKind::Opt, idx, Action::None);
         y += row;
+    };
+    for (int i = 0; i < COUNT; i++) {
+        const Btn b = (Btn)i;
+        const Binding bd = get(b);
+        line(n++, name(b), pad_label(bd.pad), key_label(bd.key), false);
     }
-    text(dl, x0 + 26 * sc, y + 10 * sc, 16.0f * sc, COL_DIM,
-         "fixed for now - these are what the program reads, written down so you do not have to guess");
-    s.opt_count = 0;
-    s.opt_sel = 0;
+    line(-1, "Control stick",    "Left stick",  "W A S D", true);
+    line(-1, "C buttons, also",  "Right stick", "-",       true);
+    line(-1, "Leave a game",     "-",           "Esc",     true);
+    y += 6 * sc;
+    line(n++, "Reset to defaults", "", "", false);
+    s.opt_count = n;
+    if (s.opt_sel >= n) s.opt_sel = n - 1;
+    if (s.opt_sel < 0)  s.opt_sel = 0;
+    text(dl, x0 + 26 * sc, y + 4 * sc, 15.0f * sc, COL_DIM,
+         "ENTER on a row, then press what you want it to be. Kept in controls.ini in this program's settings folder.");
     static const HintItem HINTS[] = {
+        { "UP/DOWN  choose", Action::None }, { "ENTER  rebind", Action::Enter },
         { "LEFT/RIGHT  tab", Action::None }, { "ESC  archive", Action::Escape },
     };
-    hint_bar(dl, w, h, sc, HINTS, 2, s.status, s);
+    hint_bar(dl, w, h, sc, HINTS, 4, s.status, s);
 }
 
 } // namespace
@@ -1896,6 +1910,7 @@ void ui_action(Action a) {
     bool cancel = false;
     bool leave = false;
     bool opt_cycle = false;
+    bool reset_controls = false;
     bool refresh = false;
     std::string refresh_game, refresh_sha1;
     {
@@ -1998,12 +2013,30 @@ void ui_action(Action a) {
         case Screen::Audio:
         case Screen::Controls:
             switch (a) {
-            case Action::Left:  s.menu = (s.menu + 3) % 4; s.screen = screen_for_tab(s.menu); break;
-            case Action::Right: s.menu = (s.menu + 1) % 4; s.screen = screen_for_tab(s.menu); break;
+            case Action::Left:  s.bind_listen = false; s.menu = (s.menu + 3) % 4; s.screen = screen_for_tab(s.menu); break;
+            case Action::Right: s.bind_listen = false; s.menu = (s.menu + 1) % 4; s.screen = screen_for_tab(s.menu); break;
             case Action::Up:    if (s.opt_sel > 0) s.opt_sel--;                               break;
             case Action::Down:  if (s.opt_sel < s.opt_count - 1) s.opt_sel++;                 break;
-            case Action::Enter: opt_cycle = true;                                             break;
-            case Action::Escape: s.menu = 0; s.screen = Screen::Archive; s.opt_sel = 0;       break;
+            case Action::Enter:
+                // CONTROLS: ENTER on a button row starts listening for the next press (main.cpp's
+                // pump hands it to ui_bind_*); the last row puts the defaults back. VIDEO cycles.
+                if (s.screen == Screen::Controls) {
+                    if (s.opt_sel == launcher::controls::COUNT) {
+                        reset_controls = true;
+                        s.status = "controls back to the defaults";
+                    } else if (s.opt_sel >= 0 && s.opt_sel < launcher::controls::COUNT) {
+                        s.bind_listen = true;
+                        s.status = std::string("press the pad button or the key for ")
+                                 + launcher::controls::name((launcher::controls::Btn)s.opt_sel);
+                    }
+                } else {
+                    opt_cycle = true;
+                }
+                break;
+            case Action::Escape:
+                if (s.bind_listen) { s.bind_listen = false; s.status = "kept as it was"; break; }
+                s.menu = 0; s.screen = Screen::Archive; s.opt_sel = 0;
+                break;
             case Action::Quit:   ultramodern::quit();                                         break;
             default: break;
             }
@@ -2038,6 +2071,7 @@ void ui_action(Action a) {
     if (cancel)        cancel_build();
     if (leave)         leave_game();
     if (opt_cycle)     cycle_option();
+    if (reset_controls) { launcher::controls::reset_defaults(); launcher::controls::save(launcher::config_dir()); }
 }
 
 // ── the mouse (main thread, from the SDL pump in main.cpp) ───────────────────
@@ -2146,6 +2180,15 @@ void ui_mouse_click(float x, float y, int clicks) {
                 tab = r.index;
                 if (tab >= 0 && tab < 4) { s.menu = tab; s.screen = screen_for_tab(tab); }
                 break;
+            case HitKind::Opt:
+                // A settings row: a click focuses it, a click on the focused row (or a double
+                // click) is ENTER on it, exactly as the library rows behave.
+                if (s.screen == Screen::Video || s.screen == Screen::Audio || s.screen == Screen::Controls) {
+                    const bool again = (s.opt_sel == r.index) || (clicks >= 2);
+                    s.opt_sel = r.index;
+                    if (again) act = Action::Enter;
+                }
+                break;
             case HitKind::Hint:
                 act = r.action;
                 break;
@@ -2160,6 +2203,45 @@ void ui_mouse_click(float x, float y, int clicks) {
     // ONE action path: whatever the pointer landed on ends up in the same call a key would make.
     if (play)                      ui_action(Action::Enter);
     else if (act != Action::None)  ui_action(act);
+}
+
+// ── CONTROLS: rebinding. main.cpp's pump hands the next press here while a row is listening. ──
+bool ui_bind_listening() {
+    UiState& s = ui();
+    std::lock_guard<std::mutex> lock(s.mutex);
+    return s.bind_listen;
+}
+
+void ui_bind_key(int scancode) {
+    using namespace controls;
+    UiState& s = ui();
+    std::lock_guard<std::mutex> lock(s.mutex);
+    if (!s.bind_listen || s.opt_sel < 0 || s.opt_sel >= COUNT) return;
+    const Btn b = (Btn)s.opt_sel;
+    set_key(b, scancode);
+    s.bind_listen = false;
+    s.status = std::string(name(b)) + " is now " + key_label(scancode) + " on the keyboard";
+    save(config_dir());
+}
+
+void ui_bind_pad(int kind, int index, int sign) {
+    using namespace controls;
+    UiState& s = ui();
+    std::lock_guard<std::mutex> lock(s.mutex);
+    if (!s.bind_listen || s.opt_sel < 0 || s.opt_sel >= COUNT) return;
+    const Btn b = (Btn)s.opt_sel;
+    const PadBind p{ kind, index, sign };
+    set_pad(b, p);
+    s.bind_listen = false;
+    s.status = std::string(name(b)) + " is now " + pad_label(p) + " on the pad";
+    save(config_dir());
+}
+
+void ui_bind_cancel() {
+    UiState& s = ui();
+    std::lock_guard<std::mutex> lock(s.mutex);
+    s.bind_listen = false;
+    s.status = "kept as it was";
 }
 
 // --play <game>, set once before the engine starts (see launcher_app.hpp for why this exists).
